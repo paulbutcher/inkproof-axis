@@ -24,3 +24,11 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 - An empty, non-finite or non-positive (log) range has no ticks, and a reversed range is read as its ascending interval. Nothing panics.
 - Floats are not a field, so the Float front ends (`linearTicks` and the others) are tested, not proved. Each checks its result with `Ticks.Valid` and returns no ticks if range or order would break (step below float spacing at the range).
 - `Inkproof.Axis.Scales` applies the front ends to Scale's `Linear`, `Log` and `Categorical` structures.
+
+## Label layout
+
+- Text is measured by the host: `layoutLabels` takes a function from a label to its width and height, and calls nothing else (AXIS-3, PROOF-13).
+- A label is a `Span` along the axis centred on its position, as long as its rotation makes it (`Rotation.extent`: 0, 45 or 90 degrees, with the cosine of 45 degrees a literal so platforms agree). `layout` is generic over the number type and the label.
+- Rule: at each rotation, keep every `k`th label at the least `k` leaving `gap` between neighbours; the rotation keeping the most labels wins, the least rotation among equals. At least one label is kept.
+- `layout_noOverlap` proves neighbours and later labels never overlap, given non-negative measurements and gap; `Layout` results are a sublist of the input. `layoutLabels` drops labels whose measurement is negative or not a number, which the hypothesis excludes, and is tested, not proved, as floats are not an ordered field.
+

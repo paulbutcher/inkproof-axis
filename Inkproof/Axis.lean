@@ -6,5 +6,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Inkproof.Axis.Categorical
 import Inkproof.Axis.Decade
 import Inkproof.Axis.Grid
+import Inkproof.Axis.LabelLayout
+import Inkproof.Axis.Layout
 import Inkproof.Axis.Scales
 import Inkproof.Axis.Ticks

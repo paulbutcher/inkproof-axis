@@ -4,9 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Inkproof.Axis
 import InkproofTools.Test.Platform
+import InkproofAxisTest.LayoutTests
 import InkproofAxisTest.TickTests
 
 open InkproofAxisTest InkproofTools.Test
 
 def main (args : List String) : IO UInt32 :=
-  runTests (platformTest (args.contains "--expect-wasm") :: TickTests.tests)
+  runTests (platformTest (args.contains "--expect-wasm") :: TickTests.tests ++ LayoutTests.tests)
