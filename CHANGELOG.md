@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.1]
+
+- Requires Float v0.5.0 and Scale v0.6.1, matching Gpu and Viewport.
+
 ## [0.5.0]
 
 - Digit and decimal-parsing code moves to core's `Inkproof.Core.Decimal`; `Axis.lsDigits`, `digitCount`, `digitsValue`, `splitAtChar` and their theorems are removed.
