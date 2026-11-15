@@ -2,6 +2,7 @@
 Copyright (c) 2026 Paul Butcher. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import Inkproof.Core.Proofs.Decimal
 import Inkproof.Axis.Label
 import Inkproof.Axis.Proofs.Grid
 
@@ -9,34 +10,9 @@ universe u
 
 namespace Inkproof.Axis.Proofs
 
+open Inkproof.Core.Decimal
+
 open Lean.Grind
-
-/-- The number written by digits given least significant first. -/
-def lsValue (ds : List Nat) : Nat := ds.foldr (fun d a => d + 10 * a) 0
-
-private theorem cases_lt_ten {d : Nat} (h : d < 10) :
-    d = 0 ∨ d = 1 ∨ d = 2 ∨ d = 3 ∨ d = 4 ∨ d = 5 ∨ d = 6 ∨ d = 7 ∨ d = 8 ∨ d = 9 := by omega
-
-theorem digitChar_isDigit {d : Nat} (h : d < 10) : (Nat.digitChar d).isDigit = true := by
-  rcases cases_lt_ten h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> decide
-
-theorem digitChar_toNat {d : Nat} (h : d < 10) : (Nat.digitChar d).toNat - 48 = d := by
-  rcases cases_lt_ten h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> decide
-
-theorem lsDigits_lt (m w : Nat) : ∀ d ∈ lsDigits m w, d < 10 := by
-  induction w generalizing m with
-  | zero => simp [lsDigits]
-  | succ w ih =>
-    intro d hd
-    simp only [lsDigits, List.mem_cons] at hd
-    rcases hd with rfl | hd
-    · omega
-    · exact ih _ d hd
-
-theorem lsDigits_length (m w : Nat) : (lsDigits m w).length = w := by
-  induction w generalizing m with
-  | zero => simp [lsDigits]
-  | succ w ih => simp [lsDigits, ih]
 
 private theorem list_strong {α : Type u} {P : List α → Prop}
     (h : ∀ l, (∀ l', l'.length < l.length → P l') → P l) (l : List α) : P l := by
@@ -45,43 +21,6 @@ private theorem list_strong {α : Type u} {P : List α → Prop}
     induction n using Nat.strongRecOn with
     | _ n ih => intro l hl; exact h l (fun l' h' => ih _ (hl ▸ h') l' rfl)
   exact this _ l rfl
-
-theorem lsValue_lsDigits (m w : Nat) : lsValue (lsDigits m w) = m % 10 ^ w := by
-  induction w generalizing m with
-  | zero => simp [lsDigits, lsValue, Nat.mod_one]
-  | succ w ih =>
-    have := ih (m / 10)
-    simp only [lsValue] at this
-    simp only [lsDigits, lsValue, List.foldr_cons, this]
-    rw [Nat.pow_succ, Nat.mul_comm (10 ^ w) 10, Nat.mod_mul]
-
-theorem lt_pow_digitCount (m : Nat) : m < 10 ^ digitCount m := by
-  induction m using Nat.strongRecOn with
-  | _ m ih =>
-    unfold digitCount
-    split
-    · simpa using ‹m < 10›
-    · have := ih (m / 10) (by omega)
-      rw [Nat.pow_succ]
-      omega
-
-theorem digitCount_spec (m : Nat) : m < 10 ^ digitCount m ∧ (m < 10 ∨ 10 ^ (digitCount m - 1) ≤ m) := by
-  refine ⟨lt_pow_digitCount m, ?_⟩
-  induction m using Nat.strongRecOn with
-  | _ m ih =>
-    by_cases h : m < 10
-    · exact Or.inl h
-    · right
-      have h1 : digitCount m = digitCount (m / 10) + 1 := by rw [digitCount]; simp [h]
-      rw [h1, Nat.add_sub_cancel]
-      rcases ih (m / 10) (by omega) with h2 | h2
-      · have : digitCount (m / 10) = 1 := by rw [digitCount]; simp [h2]
-        rw [this]; omega
-      · have : 10 ^ (digitCount (m / 10) - 1) * 10 ≤ m := by omega
-        have h3 : 0 < digitCount (m / 10) := by rw [digitCount]; split <;> omega
-        calc 10 ^ digitCount (m / 10) = 10 ^ (digitCount (m / 10) - 1) * 10 := by
-              rw [← Nat.pow_succ]; congr 1; omega
-          _ ≤ m := this
 
 theorem groupRuns_of_le (g : Char) (k : Nat) (l : List Char) (h : l.length ≤ k) : groupRuns g k l = l := by
   rw [groupRuns]; split
@@ -107,18 +46,6 @@ theorem length_groupRuns (g : Char) (k : Nat) (hk : 0 < k) (l : List Char) :
     · rw [groupRuns_of_le g k l (by omega)]
       have : (l.length - 1) / k = 0 := Nat.div_eq_of_lt (by omega)
       omega
-
-theorem digitsValue_reverse (ds : List Nat) (h : ∀ d ∈ ds, d < 10) :
-    digitsValue (ds.reverse.map Nat.digitChar) = lsValue ds := by
-  induction ds with
-  | nil => simp [digitsValue, lsValue]
-  | cons d ds ih =>
-    have hd : d < 10 := h d (by simp)
-    have := ih (fun x hx => h x (by simp [hx]))
-    simp only [List.reverse_cons, List.map_append, List.map_cons, List.map_nil, digitsValue,
-      List.foldl_append, List.foldl_cons, List.foldl_nil, digitChar_toNat hd] at *
-    simp only [lsValue, List.foldr_cons] at *
-    rw [this]; omega
 
 theorem filter_groupRuns (g : Char) (k : Nat) (hk : 0 < k) (l : List Char) (hg : g ∉ l) :
     (groupRuns g k l).filter (· ≠ g) = l := by
@@ -149,21 +76,6 @@ private theorem mem_groupRuns (g : Char) (k : Nat) (l : List Char) {x : Char} (h
         · exact Or.inl h
         · exact Or.inr (List.mem_of_mem_drop h)
     · exact Or.inr hx
-
-theorem splitAtChar_none (c : Char) (a : List Char) (h : c ∉ a) : splitAtChar c a = (a, none) := by
-  induction a with
-  | nil => simp [splitAtChar]
-  | cons x r ih =>
-    have hx : x ≠ c := fun e => h (e ▸ List.mem_cons_self)
-    simp [splitAtChar, hx, ih (fun m => h (List.mem_cons_of_mem _ m))]
-
-theorem splitAtChar_some (c : Char) (a b : List Char) (h : c ∉ a) :
-    splitAtChar c (a ++ c :: b) = (a, some b) := by
-  induction a with
-  | nil => simp [splitAtChar]
-  | cons x r ih =>
-    have hx : x ≠ c := fun e => h (e ▸ List.mem_cons_self)
-    simp [splitAtChar, hx, ih (fun m => h (List.mem_cons_of_mem _ m))]
 
 theorem ungroup_group {loc : Locale} (hl : loc.Valid) (l : List Char)
     (hd : ∀ c ∈ l, c.isDigit = true) : ungroupWhole loc (groupWhole loc l) = l := by
@@ -196,15 +108,11 @@ private theorem filter_reverse' {α : Type u} (p : α → Bool) (l : List α) :
 /-- A label reads back as the mantissa and decimals it was written from. -/
 theorem parseChars_formatChars {loc : Locale} (hl : loc.Valid) (p : Nat) (n : Int) :
     parseChars loc (formatChars loc p n) = some (n, p) := by
-  have hW : p < max (digitCount n.natAbs) (p + 1) := by omega
-  have hm : n.natAbs < 10 ^ max (digitCount n.natAbs) (p + 1) :=
-    Nat.lt_of_lt_of_le (lt_pow_digitCount _) (Nat.pow_le_pow_right (by omega) (by omega))
-  generalize hW' : max (digitCount n.natAbs) (p + 1) = W at hW hm
-  have hlt := lsDigits_lt n.natAbs W
-  have hlen := lsDigits_length n.natAbs W
-  generalize hds : lsDigits n.natAbs W = ds at hlt hlen
-  have hval : lsValue ds = n.natAbs := by
-    rw [← hds, lsValue_lsDigits]; exact Nat.mod_eq_of_lt hm
+  have hlt : ∀ d ∈ scaledDigits p n.natAbs, d < 10 := fun d => scaledDigits_lt p n.natAbs d
+  have hlen := scaledDigits_length p n.natAbs
+  have hval := lsValue_scaledDigits p n.natAbs
+  generalize hds : scaledDigits p n.natAbs = ds at hlt hlen hval
+  have hW : p < ds.length := by rw [hlen]; omega
   have hwd : ∀ c ∈ (ds.drop p).map Nat.digitChar, c.isDigit = true := by
     intro c hc
     obtain ⟨d, hd, rfl⟩ := List.mem_map.1 hc
@@ -268,7 +176,7 @@ theorem parseChars_formatChars {loc : Locale} (hl : loc.Valid) (p : Nat) (n : In
   have hfmt : formatChars loc p n = (if n < 0 then [loc.minus] else []) ++
       ((groupWhole loc ((ds.drop p).map Nat.digitChar)).reverse ++
         (if p = 0 then [] else loc.decimal :: ((ds.take p).map Nat.digitChar).reverse)) := by
-    rw [← hds]; simp only [formatChars, hW', List.append_assoc]
+    rw [← hds]; simp only [formatChars, List.append_assoc]
   rw [hfmt]
   have hres : ∀ neg : Bool, (neg = true → n < 0) → (neg = false → 0 ≤ n) →
       (let (whole, frac) := splitAtChar loc.decimal

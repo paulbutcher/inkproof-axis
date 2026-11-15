@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.0]
+
+- Digit and decimal-parsing code moves to core's `Inkproof.Core.Decimal`; `Axis.lsDigits`, `digitCount`, `digitsValue`, `splitAtChar` and their theorems are removed.
+
 ## [0.4.0]
 
 - Labels use core's `Nat.digitChar`; `Axis.digitChar` is removed and its theorems restate over the core function.
