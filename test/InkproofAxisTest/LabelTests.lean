@@ -1,0 +1,74 @@
+/-
+Copyright (c) 2026 Paul Butcher. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+-/
+import Inkproof.Axis
+import InkproofTools.Test.Harness
+
+namespace InkproofAxisTest.LabelTests
+
+open InkproofTools.Test
+open Inkproof.Axis
+
+private def locales : List Locale := [.en, .de, .fr, .plain]
+
+/-- Spans from 1e-6 to 1e9 around zero or a modest offset, where floats can carry the labels. -/
+private def genRange (g : Rng) : (Float × Float) × Rng :=
+  let (m, g) := g.below 1000
+  let (e, g) := g.below 16
+  let (o, g) := g.below 3
+  let (s, g) := g.below 1000
+  let span := (m.toFloat + 1) * Float.pow 10 (e.toFloat - 6)
+  let offset := match o with | 0 => 0 | 1 => s.toFloat * 7 | _ => -(s.toFloat) * 13
+  ((offset, offset + span), g)
+
+private def readBack (loc : Locale) (s : String) : Option Float :=
+  (parseChars loc s.toList).map fun (n, p) => Float.ofInt n / Float.pow 10 p.toFloat
+
+private def labelsMatchTicks : TestCase := .mk "Labels are distinct, one per tick, and read back as the ticks" <|
+  forAll 3000 genRange fun (lo, hi) => do
+    let ts := linearTicks lo hi 6
+    for loc in locales do
+      let ls := tickLabels loc ts
+      check (ls.length == ts.length) s!"{ls.length} labels for {ts}"
+      check ((ls.zip ls.tail).all fun (a, b) => a != b) s!"adjacent labels equal: {ls}"
+      for (t, l) in ts.zip ls do
+        match readBack loc l with
+        | some v => check ((v - t).abs ≤ 1e-9 * (1 + t.abs)) s!"{l} reads back as {v}, not {t}"
+        | none => check false s!"{l} does not parse"
+
+private def localesAgree : TestCase := .mk "Locales differ in notation, not in value" <|
+  forAll 1000 genRange fun (lo, hi) => do
+    let ts := linearTicks lo hi 6
+    let reads (loc : Locale) := (tickLabels loc ts).map fun l => parseChars loc l.toList
+    check (reads .en == reads .de) "en and de disagree"
+    check (reads .en == reads .fr) "en and fr disagree"
+
+private def precisionFollowsSpacing : TestCase := .mk "Precision is the fewest decimals that show the ticks" <|
+  forAll 1000 genRange fun (lo, hi) => do
+    let ts := linearTicks lo hi 6
+    let decimals (l : String) := (l.toList.dropWhile (· != '.')).length.pred
+    let ls := tickLabels .plain ts
+    match ts, ls with
+    | _ :: _, _ :: _ =>
+      let p := (ls.map decimals).foldl max 0
+      check (p == 0 || ls.any fun l => decimals l == p && !l.endsWith "0") s!"trailing zeros: {ls}"
+    | _, _ => pure ()
+
+private def degenerate : TestCase := .mk "Labels for no ticks, or ticks no float can show, are empty" <|
+  do
+    check ((tickLabels .en []).isEmpty) "empty"
+    check ((tickLabels .en [0, 1e300, 2e300]).isEmpty) "huge"
+    check ((tickLabels .en [0, 0.5 * Float.pow 10 (-20), Float.pow 10 (-20)]).isEmpty) "tiny"
+    check ((tickLabels .en [0, 1, 0.0 / 0.0]).isEmpty) "nan"
+
+private def known : TestCase := .mk "Grouping and separators follow the locale" <|
+  do
+    check (tickLabels .en [-1500, 0, 1500000] == ["-1,500", "0", "1,500,000"]) s!"{tickLabels .en [-1500, 0, 1500000]}"
+    check (tickLabels .de [0.5, 1, 1500.5] == ["0,5", "1,0", "1.500,5"]) s!"{tickLabels .de [0.5, 1, 1500.5]}"
+    check (tickLabels .fr [1000, 2000] == ["1\u202F000", "2\u202F000"]) s!"{tickLabels .fr [1000, 2000]}"
+
+def tests : List TestCase :=
+  [labelsMatchTicks, localesAgree, precisionFollowsSpacing, degenerate, known]
+
+end InkproofAxisTest.LabelTests

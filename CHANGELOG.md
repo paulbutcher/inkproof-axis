@@ -2,6 +2,7 @@
 
 ## [0.2.0]
 
+- Tick labels with locale definitions, with proved read-back and distinct adjacent labels.
 - Label layout against host text measurements, with proved non-overlap of the labels kept.
 
 ## [0.1.0]

@@ -25,6 +25,12 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 - Floats are not a field, so the Float front ends (`linearTicks` and the others) are tested, not proved. Each checks its result with `Ticks.Valid` and returns no ticks if range or order would break (step below float spacing at the range).
 - `Inkproof.Axis.Scales` applies the front ends to Scale's `Linear`, `Log` and `Categorical` structures.
 
+## Labels
+
+- A `Locale` gives the decimal separator, grouping and minus sign; `Locale.Valid` is the hypothesis under which labels read back (AXIS-2, PROOF-12). `en`, `de`, `fr` and `plain` are provided.
+- A label is integer arithmetic: `scaled` rounds a tick to a whole number of units of `10 ^ -p`, and `formatChars` writes that integer with `p` decimals. No float is printed, so labels agree on every platform.
+- `parseChars_formatChars` proves a label reads back as its mantissa and precision; `label_adjacent_ne` proves adjacent grid ticks at least one unit apart get different labels.
+- `tickLabels` chooses the fewest decimals (up to 15) that show every tick and keep adjacent labels distinct, and returns no labels if none does. Like the Float tick front ends it is tested, not proved.
 ## Label layout
 
 - Text is measured by the host: `layoutLabels` takes a function from a label to its width and height, and calls nothing else (AXIS-3, PROOF-13).
