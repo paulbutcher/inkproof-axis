@@ -17,10 +17,10 @@ def lsValue (ds : List Nat) : Nat := ds.foldr (fun d a => d + 10 * a) 0
 private theorem cases_lt_ten {d : Nat} (h : d < 10) :
     d = 0 ∨ d = 1 ∨ d = 2 ∨ d = 3 ∨ d = 4 ∨ d = 5 ∨ d = 6 ∨ d = 7 ∨ d = 8 ∨ d = 9 := by omega
 
-theorem digitChar_isDigit {d : Nat} (h : d < 10) : (digitChar d).isDigit = true := by
+theorem digitChar_isDigit {d : Nat} (h : d < 10) : (Nat.digitChar d).isDigit = true := by
   rcases cases_lt_ten h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> decide
 
-theorem digitChar_toNat {d : Nat} (h : d < 10) : (digitChar d).toNat - 48 = d := by
+theorem digitChar_toNat {d : Nat} (h : d < 10) : (Nat.digitChar d).toNat - 48 = d := by
   rcases cases_lt_ten h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> decide
 
 theorem lsDigits_lt (m w : Nat) : ∀ d ∈ lsDigits m w, d < 10 := by
@@ -109,7 +109,7 @@ theorem length_groupRuns (g : Char) (k : Nat) (hk : 0 < k) (l : List Char) :
       omega
 
 theorem digitsValue_reverse (ds : List Nat) (h : ∀ d ∈ ds, d < 10) :
-    digitsValue (ds.reverse.map digitChar) = lsValue ds := by
+    digitsValue (ds.reverse.map Nat.digitChar) = lsValue ds := by
   induction ds with
   | nil => simp [digitsValue, lsValue]
   | cons d ds ih =>
@@ -205,55 +205,55 @@ theorem parseChars_formatChars {loc : Locale} (hl : loc.Valid) (p : Nat) (n : In
   generalize hds : lsDigits n.natAbs W = ds at hlt hlen
   have hval : lsValue ds = n.natAbs := by
     rw [← hds, lsValue_lsDigits]; exact Nat.mod_eq_of_lt hm
-  have hwd : ∀ c ∈ (ds.drop p).map digitChar, c.isDigit = true := by
+  have hwd : ∀ c ∈ (ds.drop p).map Nat.digitChar, c.isDigit = true := by
     intro c hc
     obtain ⟨d, hd, rfl⟩ := List.mem_map.1 hc
     exact digitChar_isDigit (hlt d (List.mem_of_mem_drop hd))
-  have hfd : ∀ c ∈ (ds.take p).map digitChar, c.isDigit = true := by
+  have hfd : ∀ c ∈ (ds.take p).map Nat.digitChar, c.isDigit = true := by
     intro c hc
     obtain ⟨d, hd, rfl⟩ := List.mem_map.1 hc
     exact digitChar_isDigit (hlt d (List.mem_of_mem_take hd))
-  have hne : (ds.drop p).map digitChar ≠ [] := by
+  have hne : (ds.drop p).map Nat.digitChar ≠ [] := by
     intro h
     have := congrArg List.length h
     simp at this; omega
   have hung := ungroup_group hl _ hwd
   have hdec := decimal_notMem_group hl _ hwd
-  have hlen' : ((ds.take p).map digitChar).length = p := by simp; omega
-  have hall : ∀ c ∈ ((ds.drop p).map digitChar).reverse ++ ((ds.take p).map digitChar).reverse,
+  have hlen' : ((ds.take p).map Nat.digitChar).length = p := by simp; omega
+  have hall : ∀ c ∈ ((ds.drop p).map Nat.digitChar).reverse ++ ((ds.take p).map Nat.digitChar).reverse,
       c.isDigit = true := by
     intro c hc
     simp only [List.mem_append, List.mem_reverse] at hc
     rcases hc with hc | hc
     · exact hwd c hc
     · exact hfd c hc
-  have hjoin : (((ds.drop p).map digitChar).reverse ++ ((ds.take p).map digitChar).reverse) =
-      ds.reverse.map digitChar := by
+  have hjoin : (((ds.drop p).map Nat.digitChar).reverse ++ ((ds.take p).map Nat.digitChar).reverse) =
+      ds.reverse.map Nat.digitChar := by
     rw [← List.map_reverse, ← List.map_reverse, ← List.map_append, ← List.reverse_append,
       List.take_append_drop]
   have hv := digitsValue_reverse ds hlt
   have hsplit : splitAtChar loc.decimal
-      ((groupWhole loc ((ds.drop p).map digitChar)).reverse ++
-        (if p = 0 then [] else loc.decimal :: ((ds.take p).map digitChar).reverse)) =
-      ((groupWhole loc ((ds.drop p).map digitChar)).reverse,
-        if p = 0 then none else some ((ds.take p).map digitChar).reverse) := by
+      ((groupWhole loc ((ds.drop p).map Nat.digitChar)).reverse ++
+        (if p = 0 then [] else loc.decimal :: ((ds.take p).map Nat.digitChar).reverse)) =
+      ((groupWhole loc ((ds.drop p).map Nat.digitChar)).reverse,
+        if p = 0 then none else some ((ds.take p).map Nat.digitChar).reverse) := by
     split
     · rw [List.append_nil]; exact splitAtChar_none _ _ (fun m => hdec (List.mem_reverse.1 m))
     · exact splitAtChar_some _ _ _ (fun m => hdec (List.mem_reverse.1 m))
-  have hungr : ungroupWhole loc (groupWhole loc ((ds.drop p).map digitChar)).reverse =
-      ((ds.drop p).map digitChar).reverse := by
+  have hungr : ungroupWhole loc (groupWhole loc ((ds.drop p).map Nat.digitChar)).reverse =
+      ((ds.drop p).map Nat.digitChar).reverse := by
     have := congrArg List.reverse hung
     unfold ungroupWhole at *
     cases hg : loc.group with
     | none => simp only [hg] at this ⊢; simpa using this
     | some g => simp only [hg] at this ⊢; rw [List.filter_reverse]; simpa using this
-  have hwrne : (groupWhole loc ((ds.drop p).map digitChar)).reverse ≠ [] := by
+  have hwrne : (groupWhole loc ((ds.drop p).map Nat.digitChar)).reverse ≠ [] := by
     intro h
     rw [h] at hungr
     have e : ungroupWhole loc [] = [] := by unfold ungroupWhole; cases loc.group <;> simp
     rw [e] at hungr
     exact hne (List.reverse_eq_nil_iff.1 hungr.symm)
-  have hminus : loc.minus ∉ (groupWhole loc ((ds.drop p).map digitChar)).reverse := by
+  have hminus : loc.minus ∉ (groupWhole loc ((ds.drop p).map Nat.digitChar)).reverse := by
     intro hm
     rw [List.mem_reverse] at hm
     unfold groupWhole at hm
@@ -266,14 +266,14 @@ theorem parseChars_formatChars {loc : Locale} (hl : loc.Valid) (p : Nat) (n : In
       · exact h3 h.symm
       · exact hl.2.1 (hwd _ h)
   have hfmt : formatChars loc p n = (if n < 0 then [loc.minus] else []) ++
-      ((groupWhole loc ((ds.drop p).map digitChar)).reverse ++
-        (if p = 0 then [] else loc.decimal :: ((ds.take p).map digitChar).reverse)) := by
+      ((groupWhole loc ((ds.drop p).map Nat.digitChar)).reverse ++
+        (if p = 0 then [] else loc.decimal :: ((ds.take p).map Nat.digitChar).reverse)) := by
     rw [← hds]; simp only [formatChars, hW', List.append_assoc]
   rw [hfmt]
   have hres : ∀ neg : Bool, (neg = true → n < 0) → (neg = false → 0 ≤ n) →
       (let (whole, frac) := splitAtChar loc.decimal
-          ((groupWhole loc ((ds.drop p).map digitChar)).reverse ++
-            (if p = 0 then [] else loc.decimal :: ((ds.take p).map digitChar).reverse))
+          ((groupWhole loc ((ds.drop p).map Nat.digitChar)).reverse ++
+            (if p = 0 then [] else loc.decimal :: ((ds.take p).map Nat.digitChar).reverse))
         let whole := ungroupWhole loc whole
         let frac := frac.getD []
         if !whole.isEmpty && (whole ++ frac).all Char.isDigit then
@@ -284,16 +284,16 @@ theorem parseChars_formatChars {loc : Locale} (hl : loc.Valid) (p : Nat) (n : In
     rw [hsplit]
     simp only []
     rw [hungr]
-    have hfr : (if p = 0 then (none : Option (List Char)) else some ((ds.take p).map digitChar).reverse).getD [] =
-        ((ds.take p).map digitChar).reverse := by
+    have hfr : (if p = 0 then (none : Option (List Char)) else some ((ds.take p).map Nat.digitChar).reverse).getD [] =
+        ((ds.take p).map Nat.digitChar).reverse := by
       split
       · rename_i h0; subst h0; simp at hlen'; simp
       · rfl
     rw [hfr, hjoin]
-    have hall' : ((ds.reverse.map digitChar)).all Char.isDigit = true := by
+    have hall' : ((ds.reverse.map Nat.digitChar)).all Char.isDigit = true := by
       rw [← hjoin]; exact List.all_eq_true.2 hall
-    have hne' : ((ds.drop p).map digitChar).reverse.isEmpty = false := by
-      cases h : ((ds.drop p).map digitChar).reverse <;> simp_all
+    have hne' : ((ds.drop p).map Nat.digitChar).reverse.isEmpty = false := by
+      cases h : ((ds.drop p).map Nat.digitChar).reverse <;> simp_all
     simp only [hne', hall', Bool.not_false, Bool.true_and, hv, hval]
     simp only [List.length_reverse, hlen']
     have : (if neg = true then -((n.natAbs : Nat) : Int) else ((n.natAbs : Nat) : Int)) = n := by

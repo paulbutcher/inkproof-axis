@@ -35,10 +35,10 @@ theorem Inkproof.Axis.Proofs.cover_lo : ∀ {α : Type u} [inst : Lean.Grind.Fie
 theorem Inkproof.Axis.Proofs.cover_valid : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : LT α] [Std.LawfulOrderLT α] [inst_4 : Std.IsLinearOrder α] [Lean.Grind.OrderedRing α] [inst_6 : DecidableLE α] [inst_7 : DecidableLT α] {fl : α → Int}, Inkproof.Axis.Proofs.IsFloor fl → ∀ {lo hi step : α}, 0 < step → Inkproof.Axis.Ticks.Valid lo hi (Inkproof.Axis.Grid.cover fl lo hi step).values = Bool.true
 theorem Inkproof.Axis.Proofs.decadeExponents_spacing : ∀ {α : Type u} [inst : IntCast α] [inst_1 : NatCast α] [inst_2 : Neg α] [inst_3 : Div α] (fl : α → Int) (lg : α → α) (lo hi : α) (stride i : Nat) (h : i + 1 < (Inkproof.Axis.decadeExponents fl lg lo hi stride).length), (Inkproof.Axis.decadeExponents fl lg lo hi stride)[i + 1] = (Inkproof.Axis.decadeExponents fl lg lo hi stride)[i] + ↑stride
 theorem Inkproof.Axis.Proofs.decadeTicks_valid : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : LT α] [Std.LawfulOrderLT α] [inst_4 : Std.IsLinearOrder α] [Lean.Grind.OrderedRing α] [inst_6 : DecidableLE α] [inst_7 : DecidableLT α] {fl : α → Int}, Inkproof.Axis.Proofs.IsFloor fl → ∀ {lg : α → α} {pw : Int → α} {lo hi : α} {stride : Nat}, 0 < stride → (∀ (a b : Int), a < b → pw a < pw b) → (∀ (e : Int), lg lo ≤ ↑e → lo ≤ pw e) → (∀ (e : Int), ↑e ≤ lg hi → pw e ≤ hi) → Inkproof.Axis.Ticks.Valid lo hi (Inkproof.Axis.decadeTicks fl lg pw lo hi stride) = Bool.true
-theorem Inkproof.Axis.Proofs.digitChar_isDigit : ∀ {d : Nat}, d < 10 → (Inkproof.Axis.digitChar d).isDigit = Bool.true
-theorem Inkproof.Axis.Proofs.digitChar_toNat : ∀ {d : Nat}, d < 10 → (Inkproof.Axis.digitChar d).toNat - 48 = d
+theorem Inkproof.Axis.Proofs.digitChar_isDigit : ∀ {d : Nat}, d < 10 → d.digitChar.isDigit = Bool.true
+theorem Inkproof.Axis.Proofs.digitChar_toNat : ∀ {d : Nat}, d < 10 → d.digitChar.toNat - 48 = d
 theorem Inkproof.Axis.Proofs.digitCount_spec : ∀ (m : Nat), m < 10 ^ Inkproof.Axis.digitCount m ∧ (m < 10 ∨ 10 ^ (Inkproof.Axis.digitCount m - 1) ≤ m)
-theorem Inkproof.Axis.Proofs.digitsValue_reverse : ∀ (ds : List Nat), (∀ (d : Nat), d ∈ ds → d < 10) → Inkproof.Axis.digitsValue (List.map Inkproof.Axis.digitChar ds.reverse) = Inkproof.Axis.Proofs.lsValue ds
+theorem Inkproof.Axis.Proofs.digitsValue_reverse : ∀ (ds : List Nat), (∀ (d : Nat), d ∈ ds → d < 10) → Inkproof.Axis.digitsValue (List.map Nat.digitChar ds.reverse) = Inkproof.Axis.Proofs.lsValue ds
 theorem Inkproof.Axis.Proofs.everyNth_getElem? : ∀ {β : Type v} (k : Nat) (l : List β) (j : Nat), (Inkproof.Axis.everyNth k l)[j]? = l[j * Max.max k 1]?
 theorem Inkproof.Axis.Proofs.everyNth_ne_nil : ∀ {β : Type v} (k : Nat) {l : List β}, l ≠ [] → Inkproof.Axis.everyNth k l ≠ []
 theorem Inkproof.Axis.Proofs.everyNth_sublist : ∀ {β : Type v} (k : Nat) (l : List β), (Inkproof.Axis.everyNth k l).Sublist l
@@ -100,7 +100,6 @@ def Inkproof.Axis.categoricalTicks : {α : Type u} → [IntCast α] → [Neg α]
 def Inkproof.Axis.clearChain : {α : Type u} → {β : Type v} → [Add α] → [inst : LE α] → [DecidableLE α] → (β → Inkproof.Axis.Span α) → α → List β → Bool
 def Inkproof.Axis.decadeExponents : {α : Type u} → [IntCast α] → [NatCast α] → [Neg α] → [Div α] → (α → Int) → (α → α) → α → α → Nat → List Int
 def Inkproof.Axis.decadeTicks : {α : Type u} → [IntCast α] → [NatCast α] → [Neg α] → [Div α] → (α → Int) → (α → α) → (Int → α) → α → α → Nat → List α
-def Inkproof.Axis.digitChar : Nat → Char
 def Inkproof.Axis.digitCount : Nat → Nat
 def Inkproof.Axis.digitsValue : List Char → Nat
 def Inkproof.Axis.durationScaleTicks : Inkproof.Scale.Linear Float → Nat → List Float

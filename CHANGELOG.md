@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.0]
+
+- Labels use core's `Nat.digitChar`; `Axis.digitChar` is removed and its theorems restate over the core function.
+
 ## [0.3.0]
 
 - Tick labels with locale definitions, with proved read-back and distinct adjacent labels.

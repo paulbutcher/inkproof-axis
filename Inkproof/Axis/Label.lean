@@ -43,8 +43,6 @@ def digitCount (m : Nat) : Nat :=
 termination_by m
 decreasing_by omega
 
-def digitChar (d : Nat) : Char := Char.ofNat (48 + d)
-
 /-- Puts `g` between runs of `k` characters, from the front. -/
 def groupRuns (g : Char) (k : Nat) (l : List Char) : List Char :=
   if _h : 0 < k ∧ k < l.length then l.take k ++ g :: groupRuns g k (l.drop k) else l
@@ -60,8 +58,8 @@ def groupWhole (loc : Locale) (whole : List Char) : List Char :=
 /-- The label of the number `n / 10 ^ p`, written with `p` decimals. -/
 def formatChars (loc : Locale) (p : Nat) (n : Int) : List Char :=
   let ds := lsDigits n.natAbs (max (digitCount n.natAbs) (p + 1))
-  let whole := groupWhole loc (ds.drop p |>.map digitChar)
-  let frac := ds.take p |>.map digitChar
+  let whole := groupWhole loc (ds.drop p |>.map Nat.digitChar)
+  let frac := ds.take p |>.map Nat.digitChar
   (if n < 0 then [loc.minus] else []) ++ whole.reverse ++
     (if p = 0 then [] else loc.decimal :: frac.reverse)
 

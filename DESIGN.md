@@ -31,6 +31,7 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 - A label is integer arithmetic: `scaled` rounds a tick to a whole number of units of `10 ^ -p`, and `formatChars` writes that integer with `p` decimals. No float is printed, so labels agree on every platform.
 - `parseChars_formatChars` proves a label reads back as its mantissa and precision; `label_adjacent_ne` proves adjacent grid ticks at least one unit apart get different labels.
 - `tickLabels` chooses the fewest decimals (up to 15) that show every tick and keep adjacent labels distinct, and returns no labels if none does. Like the Float tick front ends it is tested, not proved.
+- Digits are written with core's `Nat.digitChar`, whose `Char` for a digit below 10 is the one we prove things about. Core's `Nat.toDigits` is not used: it is most-significant-first with no fixed width (labels need exactly `p` decimals) and has no length or value lemmas, so `lsDigits`, `digitCount` and `digitsValue` stay.
 ## Label layout
 
 - Text is measured by the host: `layoutLabels` takes a function from a label to its width and height, and calls nothing else (AXIS-3, PROOF-13).
