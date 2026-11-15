@@ -12,9 +12,11 @@ package «inkproof-axis» where
     ⟨`warningAsError, true⟩
   ]
 
+require «inkproof-scale» from git "https://github.com/paulbutcher/inkproof-scale" @ "v0.6.0"
+
 @[default_target]
 lean_lib InkproofAxis where
-  roots := #[`Inkproof.Axis]
+  roots := #[`Inkproof.Axis, `Inkproof.Axis.Proofs]
 
 @[test_driver]
 script tests do

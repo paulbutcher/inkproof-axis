@@ -13,7 +13,21 @@ package «inkproof-axis-test» where
   ]
 
 require «inkproof-axis» from ".."
+require «inkproof-tools» from git "https://github.com/paulbutcher/inkproof-tools" @ "v0.2.1"
 
-@[default_target, test_driver]
+-- Compile-time tests: compiling is passing.
+@[default_target]
+lean_lib InkproofAxisTest where
+  globs := #[.submodules `InkproofAxisTest]
+
+-- Runtime tests. `Main.lean` must stay buildable by Lasm, so it imports nothing that needs Lean's
+-- compiler at run time.
+@[default_target]
 lean_exe tests where
   root := `Main
+
+@[test_driver]
+script test do
+  let child ← IO.Process.spawn
+    { cmd := "lake", args := #["exe", "inkproof-tools/inkproof-test-driver"], cwd := __dir__ }
+  return if (← child.wait) == 0 then 0 else 1
