@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.3]
+
+- README lists what the library does.
+
 ## [0.5.2]
 
 - Lasm tests run under @lasm/cli 0.8.0.
