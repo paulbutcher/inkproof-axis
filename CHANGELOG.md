@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.2]
+
+- Lasm tests run under @lasm/cli 0.8.0.
+
 ## [0.5.1]
 
 - Requires Float v0.5.0 and Scale v0.6.1, matching Gpu and Viewport.
