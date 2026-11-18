@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.4]
+
+- README lists `groupRuns` under What it does.
+
 ## [0.5.3]
 
 - README lists what the library does.
