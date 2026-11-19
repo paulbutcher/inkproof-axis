@@ -3,6 +3,7 @@ Copyright (c) 2026 Paul Butcher. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Inkproof.Axis.Layout
+import Inkproof.Axis.LabelLayout
 import Inkproof.Axis.Proofs.Grid
 
 universe u v
@@ -142,6 +143,37 @@ theorem centred_length (pos ext : α) : (Span.centred pos ext).hi - (Span.centre
   simp only [Span.centred]
   grind
 
+omit [LT α] [Std.LawfulOrderLT α] [Std.IsLinearOrder α] [OrderedRing α] in
+theorem thinSorted_eq (span : β → Span α) (gap : α) (items : List β) :
+    thinSorted span gap items =
+      thin span gap (items.mergeSort fun a b => decide ((span a).lo ≤ (span b).lo)) := rfl
+
+theorem layoutLabelsVertical_eq (measure : String → Float × Float) (gap : Float) (labels : List (Float × String)) :
+    layoutLabelsVertical measure gap labels =
+      letI : IntCast Float := ⟨Float.ofInt⟩
+      thinSorted (fun l => Span.centred l.1 (measure l.2).2) (if 0 ≤ gap then gap else 0)
+        (labels.filter fun l =>
+          let (w, h) := measure l.2; 0 ≤ w && 0 ≤ h && w.isFinite && h.isFinite) := rfl
+
+omit [LT α] [Std.LawfulOrderLT α] [Std.IsLinearOrder α] [OrderedRing α] in
+theorem thinSorted_subset (span : β → Span α) (gap : α) (items : List β) :
+    ∀ x ∈ (thinSorted span gap items).2, x ∈ items := fun _ hx =>
+  (List.mergeSort_perm items _).subset ((thin_sublist _ _ _).subset hx)
+
+omit [LT α] [Std.LawfulOrderLT α] [Std.IsLinearOrder α] [OrderedRing α] in
+theorem thinSorted_ne_nil (span : β → Span α) (gap : α) {items : List β} (h : items ≠ []) :
+    (thinSorted span gap items).2 ≠ [] :=
+  thin_ne_nil _ _ fun e => by
+    have := List.mergeSort_perm items fun a b => decide ((span a).lo ≤ (span b).lo)
+    rw [e] at this
+    exact h this.symm.eq_nil
+
+/-- Whatever order the labels are given in, those kept have `gap` between neighbours and later ones, provided every span runs forward. -/
+theorem thinSorted_clear {span : β → Span α} {gap : α} (hg : 0 ≤ gap) {items : List β}
+    (hw : ∀ x ∈ items, (span x).lo ≤ (span x).hi) :
+    (thinSorted span gap items).2.Pairwise fun a b => (span a).hi + gap ≤ (span b).lo :=
+  thin_clear hg fun x hx => hw x ((List.mergeSort_perm items _).subset hx)
+
 /-- Given a host measurement of each label as a non-negative width and height, the labels kept never overlap: each ends at least `gap` before the next begins, along the axis, in the rotation chosen. -/
 theorem layout_noOverlap {c gap : α} (hc : 0 ≤ c) (hg : 0 ≤ gap) (pos : β → α) (measure : β → α × α)
     {items : List β} (hm : ∀ x ∈ items, 0 ≤ (measure x).1 ∧ 0 ≤ (measure x).2) :
@@ -151,6 +183,14 @@ theorem layout_noOverlap {c gap : α} (hc : 0 ≤ c) (hg : 0 ≤ gap) (pos : β 
       (spans (layout spans gap items).rotation a).hi + gap ≤ (spans (layout spans gap items).rotation b).lo := by
   intro spans
   exact layout_clear (spans := spans) hg fun r x hx => centred_wf (extent_nonneg hc (hm x hx).1 (hm x hx).2 r)
+
+/-- On a vertical axis, whatever order the positions are in, the labels kept are at least `gap` apart by height. -/
+theorem thinSorted_noOverlap {gap : α} (hg : 0 ≤ gap) (pos : β → α) (height : β → α)
+    {items : List β} (hm : ∀ x ∈ items, 0 ≤ height x) :
+    let span (x : β) : Span α := Span.centred (pos x) (height x)
+    (thinSorted span gap items).2.Pairwise fun a b => (span a).hi + gap ≤ (span b).lo := by
+  intro span
+  exact thinSorted_clear hg fun x hx => centred_wf (hm x hx)
 end
 
 

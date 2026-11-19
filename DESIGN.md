@@ -37,5 +37,6 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 - Text is measured by the host: `layoutLabels` takes a function from a label to its width and height, and calls nothing else (AXIS-3, PROOF-13).
 - A label is a `Span` along the axis centred on its position, as long as its rotation makes it (`Rotation.extent`: 0, 45 or 90 degrees, with the cosine of 45 degrees a literal so platforms agree). `layout` is generic over the number type and the label.
 - Rule: at each rotation, keep every `k`th label at the least `k` leaving `gap` between neighbours; the rotation keeping the most labels wins, the least rotation among equals. At least one label is kept.
+- A vertical axis has no rotation: `layoutLabelsVertical` spans labels by height and sorts them by position before thinning (`thinSorted`), so descending pixel positions work; `thinSorted_noOverlap` proves the kept labels clear for any input order.
 - `layout_noOverlap` proves neighbours and later labels never overlap, given non-negative measurements and gap; `Layout` results are a sublist of the input. `layoutLabels` drops labels whose measurement is negative or not a number, which the hypothesis excludes, and is tested, not proved, as floats are not an ordered field.
 

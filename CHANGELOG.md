@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.6.0]
+
+- `layoutLabelsVertical` lays out labels on a vertical axis by their height, with positions in either order.
+
 ## [0.5.4]
 
 - README lists `groupRuns` under What it does.

@@ -28,7 +28,7 @@ require «inkproof-axis» from git "https://github.com/paulbutcher/inkproof-axis
 - Format tick values as number labels for a locale (decimal separator, digit grouping, minus sign), with the fewest decimals that keep adjacent labels distinct: `tickLabels`, `label`, `scaled`, `formatChars`, `Locale` (`en`, `de`, `fr`, `plain`).
 - Group the digits of a number in runs with a separator, from the front of the list given: `groupRuns`.
 - Parse a formatted number back to its value and precision: `parseChars`, `ungroupWhole`, with `parse_label` proving the round trip.
-- Decide which axis labels to show and whether to rotate them so they do not overlap, using text sizes measured by the host: `layoutLabels`, and the generic `layout`, `thin`, `everyNth`, `clearChain`, `Rotation`, `Span`, `Layout`.
+- Decide which axis labels to show and whether to rotate them so they do not overlap, using text sizes measured by the host: `layoutLabels`, and `layoutLabelsVertical` for a vertical axis (spans labels by height, positions in either order), and the generic `layout`, `thin`, `everyNth`, `clearChain`, `Rotation`, `Span`, `Layout`.
 
 ## Guarantees
 

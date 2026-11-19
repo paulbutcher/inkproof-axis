@@ -68,7 +68,18 @@ private def unusableDropped : TestCase := .mk "A label with no usable measuremen
     check (r.kept.map (·.2) == ["ok", "ok"]) s!"{r.kept}"
     check ((layoutLabels measure 0 []).kept.isEmpty) "empty"
 
+private def verticalSpansHeight : TestCase := .mk "A vertical axis thins by height in either order, keeping labels apart" <|
+  forAll 3000 genLabels fun (labels, gap) => do
+    for ls in [labels, labels.reverse] do
+      let (stride, kept) := layoutLabelsVertical measure gap ls
+      check (ls.isEmpty || !kept.isEmpty) "nothing kept"
+      check (kept.all fun l => ls.contains l) "kept a label that was not given"
+      for (a, b) in kept.zip kept.tail do
+        check (a.1 + (measure a.2).2 / 2 + gap ≤ b.1 - (measure b.2).2 / 2) s!"{a} overlaps {b} at {stride}"
+    let tall := (List.range 13).map fun i => ((i * 20).toFloat, "123456789")
+    check ((layoutLabelsVertical measure 2 tall.reverse).2.length == 13) "thinned by width"
+
 def tests : List TestCase :=
-  [neverOverlap, keepsAllWhenRoomy, rotatesBeforeThinning, thinsWhenRotationFails, unusableDropped]
+  [neverOverlap, keepsAllWhenRoomy, rotatesBeforeThinning, thinsWhenRotationFails, unusableDropped, verticalSpansHeight]
 
 end InkproofAxisTest.LayoutTests

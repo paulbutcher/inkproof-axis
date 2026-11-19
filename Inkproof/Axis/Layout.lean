@@ -51,6 +51,11 @@ def thin {α : Type u} {β : Type v} [Add α] [LE α] [DecidableLE α] (span : �
   | some i => (i + 1, everyNth (i + 1) items)
   | none => (items.length, items.take 1)
 
+/-- `thin` applied to the elements ordered by where their spans start, so the input may run in either direction. -/
+def thinSorted {α : Type u} {β : Type v} [Add α] [LE α] [DecidableLE α] (span : β → Span α) (gap : α)
+    (items : List β) : Nat × List β :=
+  thin span gap (items.mergeSort fun a b => decide ((span a).lo ≤ (span b).lo))
+
 structure Layout (β : Type v) where
   rotation : Rotation
   stride : Nat
