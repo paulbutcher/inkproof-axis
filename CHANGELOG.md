@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.7.0]
+
+- `timeTickLabels` and `timeLabels` label unix-time ticks in UTC at the precision the step needs, marking the first tick of a day or month, with `parseTimeLabel` proved to read each label back; depends on `inkproof-core` v0.13.0.
+
 ## [0.6.0]
 
 - `layoutLabelsVertical` lays out labels on a vertical axis by their height, with positions in either order.

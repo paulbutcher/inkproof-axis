@@ -11,4 +11,5 @@ import Inkproof.Axis.LabelLayout
 import Inkproof.Axis.Layout
 import Inkproof.Axis.Scales
 import Inkproof.Axis.TickLabels
+import Inkproof.Axis.TimeLabel
 import Inkproof.Axis.Ticks

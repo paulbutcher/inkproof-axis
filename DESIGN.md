@@ -32,6 +32,12 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 - `parseChars_formatChars` proves a label reads back as its mantissa and precision; `label_adjacent_ne` proves adjacent grid ticks at least one unit apart get different labels.
 - `tickLabels` chooses the fewest decimals (up to 15) that show every tick and keep adjacent labels distinct, and returns no labels if none does. Like the Float tick front ends it is tested, not proved.
 - Digits are written with core's `Nat.digitChar`, whose `Char` for a digit below 10 is the one we prove things about. Core's `Nat.toDigits` is not used: it is most-significant-first with no fixed width (labels need exactly `p` decimals) and has no length or value lemmas, so `lsDigits`, `digitCount` and `digitsValue` stay.
+## Time labels
+
+- A tick is whole seconds after 1970-01-01 UTC; core's `civilFromDays` gives its date. `timeLabel` picks a `TimeLabel` from the step: seconds when the step is not a whole number of minutes, a date at the first tick of a day (of a month, for steps of a day or more).
+- Month names come from the caller; `MonthNames.Valid` (twelve distinct names without a space or colon) is the hypothesis under which `parseTimeLabel` reads a label back. `parse_timeLabel` proves the text reads back as a label showing the tick's own clock fields or a date it falls on.
+- `timeTickLabels` takes float ticks and gives no labels unless every tick is finite and under 10 ^ 15 seconds. Years are not shown.
+
 ## Label layout
 
 - Text is measured by the host: `layoutLabels` takes a function from a label to its width and height, and calls nothing else (AXIS-3, PROOF-13).

@@ -23,6 +23,7 @@ field Inkproof.Axis.Locale.groupSize : Inkproof.Axis.Locale → Nat
 field Inkproof.Axis.Locale.minus : Inkproof.Axis.Locale → Char
 constructor Inkproof.Axis.Locale.mk : Char → Option Char → Nat → Char → Inkproof.Axis.Locale
 def Inkproof.Axis.Locale.plain : Inkproof.Axis.Locale
+def Inkproof.Axis.MonthNames.Valid : List String → Prop
 def Inkproof.Axis.Proofs.IsFloor : {α : Type u} → [Lean.Grind.Field α] → [LE α] → [LT α] → (α → Int) → Prop
 theorem Inkproof.Axis.Proofs.categoricalTicks_mem : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : LT α] [Std.LawfulOrderLT α] [inst_4 : Std.IsLinearOrder α] [Lean.Grind.OrderedRing α] {fl : α → Int}, Inkproof.Axis.Proofs.IsFloor fl → ∀ (n : Nat) (lo hi : α) {stride : Nat}, 0 < stride → ∀ {x : Nat}, x ∈ Inkproof.Axis.categoricalTicks fl n lo hi stride → x < n ∧ lo ≤ ↑↑x ∧ ↑↑x ≤ hi
 theorem Inkproof.Axis.Proofs.categoricalTicks_sorted : ∀ {α : Type u} [inst : IntCast α] [inst_1 : Neg α] (fl : α → Int) (n : Nat) (lo hi : α) (stride : Nat), List.Pairwise (fun x1 x2 => x1 < x2) (Inkproof.Axis.categoricalTicks fl n lo hi stride)
@@ -56,9 +57,14 @@ theorem Inkproof.Axis.Proofs.layout_rotation_least : ∀ {α : Type u} {β : Typ
 theorem Inkproof.Axis.Proofs.layout_stride_le : ∀ {α : Type u} {β : Type v} [inst : Add α] [inst_1 : LE α] [inst_2 : DecidableLE α] (spans : Inkproof.Axis.Rotation → β → Inkproof.Axis.Span α) (gap : α) (items : List β) (r : Inkproof.Axis.Rotation), (Inkproof.Axis.layout spans gap items).stride ≤ (Inkproof.Axis.thin (spans r) gap items).fst
 theorem Inkproof.Axis.Proofs.layout_sublist : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : DecidableLE α] {β : Type v} (spans : Inkproof.Axis.Rotation → β → Inkproof.Axis.Span α) (gap : α) (items : List β), (Inkproof.Axis.layout spans gap items).kept.Sublist items
 theorem Inkproof.Axis.Proofs.length_groupRuns : ∀ (g : Char) (k : Nat), 0 < k → ∀ (l : List Char), (Inkproof.Axis.groupRuns g k l).length = l.length + (l.length - 1) / k
+theorem Inkproof.Axis.Proofs.monthName_spec : ∀ (months : List String) {m : Nat} (h1 : 1 ≤ m) (h2 : m ≤ months.length), Inkproof.Axis.monthName months m = months[m - 1].toList
+theorem Inkproof.Axis.Proofs.monthOf_monthName : ∀ {months : List String}, Inkproof.Axis.MonthNames.Valid months → ∀ {m : Nat}, 1 ≤ m → m ≤ 12 → Inkproof.Axis.monthOf months (Inkproof.Axis.monthName months m) = Option.some m
 theorem Inkproof.Axis.Proofs.natCast_pos : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : LT α] [Std.LawfulOrderLT α] [inst_4 : Std.IsLinearOrder α] [Lean.Grind.OrderedRing α] (n : Nat), 0 < ↑(n + 1)
 theorem Inkproof.Axis.Proofs.parseChars_formatChars : ∀ {loc : Inkproof.Axis.Locale}, loc.Valid → ∀ (p : Nat) (n : Int), Inkproof.Axis.parseChars loc (Inkproof.Axis.formatChars loc p n) = Option.some (n, p)
+theorem Inkproof.Axis.Proofs.parseClock_spec : ∀ {h m : Nat}, h < 100 → m < 100 → Inkproof.Axis.parseClock (Inkproof.Axis.twoDigits h ++ ':' :: Inkproof.Axis.twoDigits m) = Option.some (Inkproof.Axis.TimeLabel.clock h m Option.none)
+theorem Inkproof.Axis.Proofs.parseTimeLabel_render : ∀ {months : List String}, Inkproof.Axis.MonthNames.Valid months → ∀ {l : Inkproof.Axis.TimeLabel}, l.WF → Inkproof.Axis.parseTimeLabel months (Inkproof.Axis.TimeLabel.render months l) = Option.some l
 theorem Inkproof.Axis.Proofs.parse_label : ∀ {loc : Inkproof.Axis.Locale}, loc.Valid → ∀ {α : Type u} [inst : IntCast α] [inst_1 : NatCast α] [inst_2 : Mul α] [inst_3 : Add α] [inst_4 : Div α] (fl : α → Int) (p : Nat) (x : α), Inkproof.Axis.parseChars loc (Inkproof.Axis.label loc fl p x).toList = Option.some (Inkproof.Axis.scaled fl p x, p)
+theorem Inkproof.Axis.Proofs.parse_timeLabel : ∀ {months : List String}, Inkproof.Axis.MonthNames.Valid months → ∀ (step : Nat) (t : Int), ∃ l, Inkproof.Axis.parseTimeLabel months (Inkproof.Axis.TimeLabel.render months (Inkproof.Axis.timeLabel step t)) = Option.some l ∧ Inkproof.Axis.TimeLabel.Shows t l
 theorem Inkproof.Axis.Proofs.scaled_spec : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : LT α] {fl : α → Int}, Inkproof.Axis.Proofs.IsFloor fl → ∀ (p : Nat) (x : α), ↑(Inkproof.Axis.scaled fl p x) ≤ x * ↑(10 ^ p) + ↑1 / ↑2 ∧ x * ↑(10 ^ p) + ↑1 / ↑2 < ↑(Inkproof.Axis.scaled fl p x) + 1
 theorem Inkproof.Axis.Proofs.scaled_succ : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : LT α] [Std.LawfulOrderLT α] [inst_4 : Std.IsLinearOrder α] [Lean.Grind.OrderedRing α] {fl : α → Int}, Inkproof.Axis.Proofs.IsFloor fl → ∀ (p : Nat) {x s : α}, 1 ≤ s * ↑(10 ^ p) → Inkproof.Axis.scaled fl p x + 1 ≤ Inkproof.Axis.scaled fl p (x + s)
 theorem Inkproof.Axis.Proofs.thinSorted_clear : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : LT α] [Std.LawfulOrderLT α] [inst_4 : Std.IsLinearOrder α] [Lean.Grind.OrderedRing α] [inst_6 : DecidableLE α] {β : Type v} {span : β → Inkproof.Axis.Span α} {gap : α}, 0 ≤ gap → ∀ {items : List β}, (∀ (x : β), x ∈ items → (span x).lo ≤ (span x).hi) → List.Pairwise (fun a b => (span a).hi + gap ≤ (span b).lo) (Inkproof.Axis.thinSorted span gap items).snd
@@ -72,6 +78,11 @@ theorem Inkproof.Axis.Proofs.thin_ne_nil : ∀ {α : Type u} [inst : Lean.Grind.
 theorem Inkproof.Axis.Proofs.thin_stride_le : ∀ {α : Type u} {β : Type v} [inst : Add α] [inst_1 : LE α] [inst_2 : DecidableLE α] (span : β → Inkproof.Axis.Span α) (gap : α) (items : List β) {t : Nat}, 1 ≤ t → Inkproof.Axis.clearChain span gap (Inkproof.Axis.everyNth t items) = Bool.true → (Inkproof.Axis.thin span gap items).fst ≤ t
 theorem Inkproof.Axis.Proofs.thin_stride_le_length : ∀ {α : Type u} {β : Type v} [inst : Add α] [inst_1 : LE α] [inst_2 : DecidableLE α] (span : β → Inkproof.Axis.Span α) (gap : α) (items : List β), (Inkproof.Axis.thin span gap items).fst ≤ items.length
 theorem Inkproof.Axis.Proofs.thin_sublist : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : DecidableLE α] {β : Type v} (span : β → Inkproof.Axis.Span α) (gap : α) (items : List β), (Inkproof.Axis.thin span gap items).snd.Sublist items
+theorem Inkproof.Axis.Proofs.timeLabel_shows : ∀ (step : Nat) (t : Int), Inkproof.Axis.TimeLabel.Shows t (Inkproof.Axis.timeLabel step t)
+theorem Inkproof.Axis.Proofs.timeLabel_wf : ∀ (step : Nat) (t : Int), (Inkproof.Axis.timeLabel step t).WF
+theorem Inkproof.Axis.Proofs.timeLabels_eq : ∀ (months : List String) (step : Nat) (ticks : List Int), Inkproof.Axis.timeLabels months step ticks = List.map (fun t => String.ofList (Inkproof.Axis.TimeLabel.render months (Inkproof.Axis.timeLabel step t))) ticks
+theorem Inkproof.Axis.Proofs.twoDigits_spec : ∀ {n : Nat}, n < 100 → Inkproof.Axis.twoDigits n = [(n / 10).digitChar, (n % 10).digitChar]
+theorem Inkproof.Axis.Proofs.twoValue_spec : ∀ {a b : Nat}, a < 10 → b < 10 → Inkproof.Axis.twoValue a.digitChar b.digitChar = Option.some (10 * a + b)
 theorem Inkproof.Axis.Proofs.ungroupWhole_spec : ∀ (loc : Inkproof.Axis.Locale) (l : List Char), Inkproof.Axis.ungroupWhole loc l = match loc.group with | Option.some g => List.filter (fun x => Decidable.decide (x ≠ g)) l | Option.none => l
 theorem Inkproof.Axis.Proofs.ungroup_group : ∀ {loc : Inkproof.Axis.Locale}, loc.Valid → ∀ (l : List Char), (∀ (c : Char), c ∈ l → c.isDigit = Bool.true) → Inkproof.Axis.ungroupWhole loc (Inkproof.Axis.groupWhole loc l) = l
 theorem Inkproof.Axis.Proofs.valid_map_range : ∀ {α : Type u} [inst : LE α] [inst_1 : LT α] [Std.LawfulOrderLT α] [Std.IsLinearOrder α] {lo hi : α} [inst_4 : DecidableLE α] [inst_5 : DecidableLT α] (f : Nat → α), (∀ (i j : Nat), i < j → f i < f j) → ∀ (n s : Nat), lo ≤ f s → (∀ (i : Nat), s ≤ i → i < s + n → f i ≤ hi) → Inkproof.Axis.Ticks.Valid lo hi (List.map f (List.range' s n)) = Bool.true
@@ -89,6 +100,13 @@ field Inkproof.Axis.Span.hi : {α : Type u} → Inkproof.Axis.Span α → α
 field Inkproof.Axis.Span.lo : {α : Type u} → Inkproof.Axis.Span α → α
 constructor Inkproof.Axis.Span.mk : {α : Type u} → α → α → Inkproof.Axis.Span α
 def Inkproof.Axis.Ticks.Valid : {α : Type u} → [inst : LE α] → [inst_1 : LT α] → [DecidableLE α] → [DecidableLT α] → α → α → List α → Bool
+inductive Inkproof.Axis.TimeLabel : Type
+def Inkproof.Axis.TimeLabel.Shows : Int → Inkproof.Axis.TimeLabel → Prop
+def Inkproof.Axis.TimeLabel.WF : Inkproof.Axis.TimeLabel → Prop
+constructor Inkproof.Axis.TimeLabel.clock : Nat → Nat → Option Nat → Inkproof.Axis.TimeLabel
+constructor Inkproof.Axis.TimeLabel.date : Nat → Nat → Inkproof.Axis.TimeLabel
+constructor Inkproof.Axis.TimeLabel.month : Nat → Inkproof.Axis.TimeLabel
+def Inkproof.Axis.TimeLabel.render : List String → Inkproof.Axis.TimeLabel → List Char
 def Inkproof.Axis.categoricalIndices : Nat → Float → Float → Nat → List Nat
 def Inkproof.Axis.categoricalScaleTicks : {κ : Type u} → Inkproof.Scale.Categorical κ Float → Float → Float → Nat → List κ
 def Inkproof.Axis.categoricalTicks : {α : Type u} → [IntCast α] → [Neg α] → (α → Int) → Nat → α → α → Nat → List Nat
@@ -105,6 +123,10 @@ theorem Inkproof.Axis.everyNth.match_1.congr_eq_2 : ∀ {β : Type u_1} (motive 
 def Inkproof.Axis.formatChars : Inkproof.Axis.Locale → Nat → Int → List Char
 def Inkproof.Axis.groupRuns : Char → Nat → List Char → List Char
 def Inkproof.Axis.groupWhole : Inkproof.Axis.Locale → List Char → List Char
+instance Inkproof.Axis.instDecidableEqTimeLabel : DecidableEq Inkproof.Axis.TimeLabel
+def Inkproof.Axis.instDecidableEqTimeLabel.decEq : (x x_1 : Inkproof.Axis.TimeLabel) → Decidable (x = x_1)
+instance Inkproof.Axis.instReprTimeLabel : Repr Inkproof.Axis.TimeLabel
+def Inkproof.Axis.instReprTimeLabel.repr : Inkproof.Axis.TimeLabel → Nat → Std.Format
 def Inkproof.Axis.label : {α : Type u} → [IntCast α] → [NatCast α] → [Mul α] → [Add α] → [Div α] → Inkproof.Axis.Locale → (α → Int) → Nat → α → String
 def Inkproof.Axis.layout : {α : Type u} → {β : Type v} → [Add α] → [inst : LE α] → [DecidableLE α] → (Inkproof.Axis.Rotation → β → Inkproof.Axis.Span α) → α → List β → Inkproof.Axis.Layout β
 def Inkproof.Axis.layoutLabels : (String → Float × Float) → Float → List (Float × String) → Inkproof.Axis.Layout (Float × String)
@@ -113,10 +135,19 @@ def Inkproof.Axis.linearScaleTicks : Inkproof.Scale.Linear Float → Nat → Lis
 def Inkproof.Axis.linearTicks : Float → Float → Nat → List Float
 def Inkproof.Axis.logScaleTicks : Inkproof.Scale.Log Float → Nat → List Float
 def Inkproof.Axis.logTicks : Float → Float → Nat → List Float
+def Inkproof.Axis.monthName : List String → Nat → List Char
+def Inkproof.Axis.monthOf : List String → List Char → Option Nat
 def Inkproof.Axis.niceStep : Float → Nat → Float
 def Inkproof.Axis.parseChars : Inkproof.Axis.Locale → List Char → Option (Int × Nat)
+def Inkproof.Axis.parseClock : List Char → Option Inkproof.Axis.TimeLabel
+def Inkproof.Axis.parseTimeLabel : List String → List Char → Option Inkproof.Axis.TimeLabel
 def Inkproof.Axis.scaled : {α : Type u} → [IntCast α] → [NatCast α] → [Mul α] → [Add α] → [Div α] → (α → Int) → Nat → α → Int
 def Inkproof.Axis.thin : {α : Type u} → {β : Type v} → [Add α] → [inst : LE α] → [DecidableLE α] → (β → Inkproof.Axis.Span α) → α → List β → Nat × List β
 def Inkproof.Axis.thinSorted : {α : Type u} → {β : Type v} → [Add α] → [inst : LE α] → [DecidableLE α] → (β → Inkproof.Axis.Span α) → α → List β → Nat × List β
 def Inkproof.Axis.tickLabels : Inkproof.Axis.Locale → List Float → List String
+def Inkproof.Axis.timeLabel : Nat → Int → Inkproof.Axis.TimeLabel
+def Inkproof.Axis.timeLabels : List String → Nat → List Int → List String
+def Inkproof.Axis.timeTickLabels : List String → Float → List Float → List String
+def Inkproof.Axis.twoDigits : Nat → List Char
+def Inkproof.Axis.twoValue : Char → Char → Option Nat
 def Inkproof.Axis.ungroupWhole : Inkproof.Axis.Locale → List Char → List Char
