@@ -6,10 +6,11 @@ import Inkproof.Axis
 import InkproofTools.Test.Platform
 import InkproofAxisTest.LabelTests
 import InkproofAxisTest.LayoutTests
+import InkproofAxisTest.MonthTickTests
 import InkproofAxisTest.TickTests
 import InkproofAxisTest.TimeLabelTests
 
 open InkproofAxisTest InkproofTools.Test
 
 def main (args : List String) : IO UInt32 :=
-  runTests (platformTest (args.contains "--expect-wasm") :: TickTests.tests ++ LabelTests.tests ++ LayoutTests.tests ++ TimeLabelTests.tests)
+  runTests (platformTest (args.contains "--expect-wasm") :: TickTests.tests ++ LabelTests.tests ++ LayoutTests.tests ++ MonthTickTests.tests ++ TimeLabelTests.tests)

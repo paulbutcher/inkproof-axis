@@ -29,6 +29,7 @@ require «inkproof-axis» from git "https://github.com/paulbutcher/inkproof-axis
 - Group the digits of a number in runs with a separator, from the front of the list given: `groupRuns`.
 - Parse a formatted number back to its value and precision: `parseChars`, `ungroupWhole`, with `parse_label` proving the round trip.
 - Label a unix-time axis (seconds since 1970-01-01 UTC) with clock times and dates at the precision the step needs, the first tick of a day or month marked, month names from the caller: `timeTickLabels`, `timeLabels`, `timeLabel`, `TimeLabel`, with `parseTimeLabel` and `Proofs.parse_timeLabel` proving a label reads back as the tick's own fields.
+- Tick a unix-time axis on the first of every month, or every n months, at local midnight in a timezone given as an offset function from instant to seconds east of UTC, and label ticks in that local time: `monthTicks` (pass `fun _ => 0` for UTC), `timeLabelsAt`, `timeTickLabelsAt`, with `Proofs.monthTicks_sound`, `monthTicks_complete` and `monthTicks_sorted`.
 - Decide which axis labels to show and whether to rotate them so they do not overlap, using text sizes measured by the host: `layoutLabels`, and `layoutLabelsVertical` for a vertical axis (spans labels by height, positions in either order), and the generic `layout`, `thin`, `everyNth`, `clearChain`, `Rotation`, `Span`, `Layout`.
 
 ## Guarantees

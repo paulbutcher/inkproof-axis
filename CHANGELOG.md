@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.0]
+
+- `monthTicks` ticks every n-th calendar month at midnight in a timezone given as an offset function, and `timeLabelsAt` and `timeTickLabelsAt` label ticks in that local time.
+
 ## [0.7.0]
 
 - `timeTickLabels` and `timeLabels` label unix-time ticks in UTC at the precision the step needs, marking the first tick of a day or month, with `parseTimeLabel` proved to read each label back; depends on `inkproof-core` v0.13.0.
