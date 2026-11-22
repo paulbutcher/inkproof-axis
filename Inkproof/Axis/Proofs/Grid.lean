@@ -17,21 +17,12 @@ attribute [local instance] Ring.intCast Semiring.natCast
 section
 variable {α : Type u} [Field α] [LE α] [LT α] [Std.LawfulOrderLT α] [Std.IsLinearOrder α] [OrderedRing α]
 
-theorem natCast_pos (n : Nat) : 0 < (Nat.cast (n + 1) : α) := by
-  induction n with
-  | zero =>
-    have h1 := OrderedRing.zero_lt_one (R := α)
-    grind
-  | succ n ih =>
-    have h1 := OrderedRing.zero_lt_one (R := α)
-    grind
+theorem natCast_pos (n : Nat) : 0 < (Nat.cast (n + 1) : α) :=
+  OrderedRing.pos_natCast_of_pos (n + 1) (by omega)
 
 theorem intCast_lt {a b : Int} (h : a < b) : (Int.cast a : α) < Int.cast b := by
-  obtain ⟨n, hn⟩ : ∃ n : Nat, b = a + (n + 1 : Nat) := ⟨(b - a - 1).toNat, by omega⟩
-  have := natCast_pos (α := α) n
-  subst hn
-  rw [Ring.intCast_add]
-  simp only [Ring.intCast_natCast]
+  have := OrderedRing.pos_intCast_of_pos (R := α) (b - a) (by omega)
+  rw [Ring.intCast_sub] at this
   grind
 
 theorem intCast_le {a b : Int} (h : a ≤ b) : (Int.cast a : α) ≤ Int.cast b := by
