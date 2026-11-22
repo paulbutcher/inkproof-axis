@@ -29,7 +29,7 @@ def durationStep (span : Float) (target : Nat) : Float :=
     | some s => s
     | none => niceStep (span / 86400) target * 86400
 
-private def ordered (lo hi : Float) : Option (Float × Float) :=
+def ordered (lo hi : Float) : Option (Float × Float) :=
   let (lo, hi) := if hi < lo then (hi, lo) else (lo, hi)
   if lo.isFinite && hi.isFinite && lo < hi then some (lo, hi) else none
 
@@ -68,6 +68,18 @@ def logTicks (lo hi : Float) (target : Nat) : List Float :=
       let stride := (decades / (max target 1).toFloat).ceil.toUInt64.toNat |> max 1
       let ts := decadeTicks floorInt Float.log10 (fun e => Float.pow 10 (Float.ofInt e)) lo hi stride
       if ts.length ≥ 2 && Ticks.Valid lo hi ts then ts else linearTicks lo hi target
+  | none => []
+
+/-- `ps` negated and reversed, then zero, then `ps`: the ticks of a symmetric axis from those of its positive side. -/
+def mirrorAboutZero {α : Type} [Neg α] [OfNat α 0] (ps : List α) : List α :=
+  (ps.map (-·)).reverse ++ 0 :: ps
+
+/-- Ticks for a symmetric log or arcsinh scale over the visible range between `lo` and `hi`: zero, the `logTicks` of `[linthresh, m]` with `m` the larger magnitude of the range's ends, and their negatives, kept where they fall within the range. `linthresh` is the magnitude below which the scale is roughly linear; if it is not positive, only zero is ticked. -/
+def symlogTicks (lo hi linthresh : Float) (target : Nat) : List Float :=
+  match ordered lo hi with
+  | some (lo, hi) =>
+    let m := max (-lo) hi
+    (mirrorAboutZero (logTicks linthresh m target)).filter fun t => lo ≤ t && t ≤ hi
   | none => []
 
 /-- The category indices to label for a categorical scale with `n` categories, band `i` at position `i`, over the visible range `[lo, hi]`: every `k`th, with `k` the least stride that gives at most `target`. -/

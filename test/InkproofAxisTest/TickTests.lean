@@ -97,6 +97,14 @@ private def logKnown : TestCase := .mk "Log ticks of 1 to 1e6 are decades" <|
   let ts := logTicks 1 1e6 7
   check (ts == [1, 10, 100, 1000, 10000, 100000, 1000000]) s!"{ts}"
 
+private def symlogKnown : TestCase := .mk "Symlog ticks mirror the decades about zero within the range" <|
+  do
+    let ts := symlogTicks (-1000) 1000 1 7
+    check (ts == [-1000, -100, -10, -1, 0, 1, 10, 100, 1000]) s!"{ts}"
+    let us := symlogTicks (-50) 1000 1 7
+    check (us == [-10, -1, 0, 1, 10, 100, 1000]) s!"{us}"
+    check (symlogTicks (-1000) 1000 0 7 == [0]) "no threshold"
+
 private def durationKnown : TestCase := .mk "Duration ticks fall on clock intervals" <|
   let ts := durationTicks 0 3600 6
   do
@@ -141,6 +149,6 @@ private def scaleAdapters : TestCase := .mk "Scale adapters tick the scale's vis
 
 def tests : List TestCase :=
   [linearInRange, linearSpacing, linearPresent, linearReversed, degenerate, linearKnown, logTests,
-    logKnown, scaleAdapters, durationKnown, durationProps, categoricalProps]
+    logKnown, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps]
 
 end InkproofAxisTest.TickTests

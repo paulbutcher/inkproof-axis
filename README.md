@@ -22,6 +22,7 @@ require «inkproof-axis» from git "https://github.com/paulbutcher/inkproof-axis
 
 - Choose tick positions for a linear axis: `linearTicks` for a range, `linearScaleTicks` for an `Inkproof.Scale.Linear`; the step comes from `niceStep`.
 - Choose tick positions for a logarithmic axis, at powers of ten: `logTicks`, `logScaleTicks`, over `decadeTicks` and `decadeExponents`.
+- Choose tick positions for a symmetric log or arcsinh axis, zero and powers of ten mirrored about it: `symlogTicks`, over `mirrorAboutZero`.
 - Choose tick positions for a categorical (band) axis: `categoricalTicks`, `categoricalIndices`, and `categoricalScaleTicks` for an `Inkproof.Scale.Categorical`.
 - Choose tick positions for an elapsed-time axis, at clock intervals from a second to a week: `durationTicks`, `durationScaleTicks`, `durationStep`, `durationSteps`.
 - Generate evenly spaced ticks over any ordered field, with spacing, order and range proved: `Grid`, `Grid.cover`, `Grid.values`, `Ticks.Valid`.

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.10.0]
+
+- `symlogTicks` ticks a symmetric log or arcsinh axis at zero and powers of ten mirrored about it.
+
 ## [0.9.0]
 
 - `clockTicks` and `durationTicksAt` tick a unix-time axis at clock intervals on a timezone's local clock, given as an offset function, with the step for `timeTickLabelsAt`.
