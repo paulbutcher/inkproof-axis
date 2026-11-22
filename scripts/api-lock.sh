@@ -19,4 +19,4 @@ for d in "${dirs[@]}"; do
   done
 done
 LEAN_PATH="$merged:$(IFS=:; echo "${dirs[*]}")" \
-  "$(lake query inkproof-tools/api-lock 2>/dev/null)" Inkproof.Axis Inkproof.Axis.Proofs
+  "$(lake query inkproof-tools/api-lock 2>/dev/null)" Inkproof.Axis Inkproof.Axis.Proofs Inkproof.Axis.PosixZone

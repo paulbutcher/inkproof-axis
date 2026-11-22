@@ -24,6 +24,8 @@ field Inkproof.Axis.Locale.minus : Inkproof.Axis.Locale → Char
 constructor Inkproof.Axis.Locale.mk : Char → Option Char → Nat → Char → Inkproof.Axis.Locale
 def Inkproof.Axis.Locale.plain : Inkproof.Axis.Locale
 def Inkproof.Axis.MonthNames.Valid : List String → Prop
+def Inkproof.Axis.PosixZone.offsetAt : Std.Time.TimeZone.RecurringRule → Int → Int
+theorem Inkproof.Axis.PosixZone.offsetAt_eq : ∀ (rule : Std.Time.TimeZone.RecurringRule) (t : Int), Inkproof.Axis.PosixZone.offsetAt rule t = (rule.timezoneAt (Std.Time.Timestamp.ofSecondsSinceUnixEpoch (Std.Time.Second.Offset.ofInt t))).offset.second.val
 def Inkproof.Axis.Proofs.IsFloor : {α : Type u} → [Lean.Grind.Field α] → [LE α] → [LT α] → (α → Int) → Prop
 theorem Inkproof.Axis.Proofs.categoricalTicks_mem : ∀ {α : Type u} [inst : Lean.Grind.Field α] [inst_1 : LE α] [inst_2 : LT α] [Std.LawfulOrderLT α] [inst_4 : Std.IsLinearOrder α] [Lean.Grind.OrderedRing α] {fl : α → Int}, Inkproof.Axis.Proofs.IsFloor fl → ∀ (n : Nat) (lo hi : α) {stride : Nat}, 0 < stride → ∀ {x : Nat}, x ∈ Inkproof.Axis.categoricalTicks fl n lo hi stride → x < n ∧ lo ≤ ↑↑x ∧ ↑↑x ≤ hi
 theorem Inkproof.Axis.Proofs.categoricalTicks_sorted : ∀ {α : Type u} [inst : IntCast α] [inst_1 : Neg α] (fl : α → Int) (n : Nat) (lo hi : α) (stride : Nat), List.Pairwise (fun x1 x2 => x1 < x2) (Inkproof.Axis.categoricalTicks fl n lo hi stride)
@@ -173,6 +175,8 @@ def Inkproof.Axis.ordered : Float → Float → Option (Float × Float)
 def Inkproof.Axis.parseChars : Inkproof.Axis.Locale → List Char → Option (Int × Nat)
 def Inkproof.Axis.parseClock : List Char → Option Inkproof.Axis.TimeLabel
 def Inkproof.Axis.parseTimeLabel : List String → List Char → Option Inkproof.Axis.TimeLabel
+def Inkproof.Axis.posixZone : String → Except String (Int → Int)
+theorem Inkproof.Axis.posixZone_eq : ∀ (rule : String), Inkproof.Axis.posixZone rule = Except.map (fun r t => (r.timezoneAt (Std.Time.Timestamp.ofSecondsSinceUnixEpoch (Std.Time.Second.Offset.ofInt t))).offset.second.val) (Std.Time.TimeZone.parsePosixTz rule)
 def Inkproof.Axis.scaled : {α : Type u} → [IntCast α] → [NatCast α] → [Mul α] → [Add α] → [Div α] → (α → Int) → Nat → α → Int
 def Inkproof.Axis.symlogTicks : Float → Float → Float → Nat → List Float
 def Inkproof.Axis.thin : {α : Type u} → {β : Type v} → [Add α] → [inst : LE α] → [DecidableLE α] → (β → Inkproof.Axis.Span α) → α → List β → Nat × List β

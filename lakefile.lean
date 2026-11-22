@@ -18,7 +18,7 @@ require «inkproof-float» from git "https://github.com/paulbutcher/inkproof-flo
 
 @[default_target]
 lean_lib InkproofAxis where
-  roots := #[`Inkproof.Axis, `Inkproof.Axis.Proofs]
+  roots := #[`Inkproof.Axis, `Inkproof.Axis.Proofs, `Inkproof.Axis.PosixZone]
 
 @[test_driver]
 script tests do

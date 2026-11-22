@@ -47,3 +47,8 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 - `layout_noOverlap` proves neighbours and later labels never overlap, given non-negative measurements and gap; `Layout` results are a sublist of the input. `layoutLabels` drops labels whose measurement is negative or not a number, which the hypothesis excludes, and is tested, not proved, as floats are not an ordered field.
 
 - `clockTicks` looks for each local clock reading at the offset a day before and after it (`localInstants`), as `monthTicks` does. A reading an offset change skips has no tick and one it repeats has two. `durationTicksAt` returns the step with the ticks, and falls back to `durationTicks` for steps under a second.
+
+## Time zones
+
+- `posixZone` parses a POSIX TZ rule with core's `Std.Time.TimeZone.parsePosixTz` and reads the offset with `RecurringRule.timezoneAt`; nothing is rebuilt. `posixZone_eq` states the value.
+- `Inkproof.Axis.PosixZone` is imported by no other Axis module and is not in `Inkproof.Axis`, so only a program that imports it links `Std.Time`'s rule parser and calendar code. The tests build and pass under Lasm with it imported.
