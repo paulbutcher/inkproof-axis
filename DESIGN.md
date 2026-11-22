@@ -46,3 +46,4 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 - A vertical axis has no rotation: `layoutLabelsVertical` spans labels by height and sorts them by position before thinning (`thinSorted`), so descending pixel positions work; `thinSorted_noOverlap` proves the kept labels clear for any input order.
 - `layout_noOverlap` proves neighbours and later labels never overlap, given non-negative measurements and gap; `Layout` results are a sublist of the input. `layoutLabels` drops labels whose measurement is negative or not a number, which the hypothesis excludes, and is tested, not proved, as floats are not an ordered field.
 
+- `clockTicks` looks for each local clock reading at the offset a day before and after it (`localInstants`), as `monthTicks` does. A reading an offset change skips has no tick and one it repeats has two. `durationTicksAt` returns the step with the ticks, and falls back to `durationTicks` for steps under a second.

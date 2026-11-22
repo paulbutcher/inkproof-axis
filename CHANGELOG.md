@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.9.0]
+
+- `clockTicks` and `durationTicksAt` tick a unix-time axis at clock intervals on a timezone's local clock, given as an offset function, with the step for `timeTickLabelsAt`.
+
 ## [0.8.0]
 
 - `monthTicks` ticks every n-th calendar month at midnight in a timezone given as an offset function, and `timeLabelsAt` and `timeTickLabelsAt` label ticks in that local time.

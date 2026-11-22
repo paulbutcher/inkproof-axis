@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
 import Inkproof.Axis.Categorical
+import Inkproof.Axis.ClockTicks
 import Inkproof.Axis.Decade
 import Inkproof.Axis.Grid
 import Inkproof.Axis.Label
