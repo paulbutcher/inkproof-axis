@@ -1,9 +1,12 @@
 # Changelog
 
+## [0.11.0]
+
+- `posixZone` builds the offset function for `monthTicks` and `durationTicksAt` from a POSIX TZ rule, in its own module `Inkproof.Axis.PosixZone`.
+
 ## [0.10.0]
 
 - `symlogTicks` ticks a symmetric log or arcsinh axis at zero and powers of ten mirrored about it.
-- `posixZone` builds the offset function for `monthTicks` and `durationTicksAt` from a POSIX TZ rule, in its own module `Inkproof.Axis.PosixZone`.
 
 ## [0.9.0]
 
