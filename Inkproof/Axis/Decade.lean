@@ -17,4 +17,8 @@ def decadeExponents {α : Type u} [IntCast α] [NatCast α] [Neg α] [Div α] (f
 def decadeTicks {α : Type u} [IntCast α] [NatCast α] [Neg α] [Div α] (fl : α → Int) (lg : α → α) (pw : Int → α) (lo hi : α) (stride : Nat) : List α :=
   (decadeExponents fl lg lo hi stride).map pw
 
+/-- The products `m * pw e` of each multiple `ms` and each exponent `e` from `e0` to `e1`, in exponent then multiple order, kept where they lie in `[lo, hi]`. -/
+def multipleTicks {α : Type u} [Mul α] [LE α] [LT α] [DecidableLE α] (pw : Int → α) (ms : List α) (lo hi : α) (e0 e1 : Int) : List α :=
+  ((List.range (e1 - e0 + 1).toNat).flatMap fun (i : Nat) => ms.map fun m => m * pw (e0 + (i : Int))).filter fun t => decide (lo ≤ t) && decide (t ≤ hi)
+
 end Inkproof.Axis

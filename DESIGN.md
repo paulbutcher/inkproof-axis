@@ -17,6 +17,7 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 
 - Linear and elapsed-duration scales use `Grid.cover` over the visible domain. A step is 1, 2 or 5 times a power of ten; durations use clock intervals (`durationSteps`) from a second to a week, and power-of-ten days beyond.
 - Log scales tick at integer powers of ten, every `stride`th when many (`decadeTicks`); `decadeTicks_valid` assumes a strictly increasing power and a logarithm agreeing at the ends. Under two powers in range falls back to linear.
+- `logTicksAt` ticks at 1, 2 and 5 or every integer within each decade (`multipleTicks`: valid by `multipleTicks_valid`, membership by `mem_multipleTicks`). Past `target` decades it thins to `logTicks`, so the dense set is never unreadable. Minor ticks are the denser set's ticks that the sparser one lacks; both are the same products, so exact comparison works.
 - Categorical scales tick at every `stride`th band index inside the visible range and the categories (`categoricalTicks`); the theorems give membership, strict order and spacing.
 
 ## Degenerate ranges and floats

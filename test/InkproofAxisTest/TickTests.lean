@@ -97,6 +97,41 @@ private def logKnown : TestCase := .mk "Log ticks of 1 to 1e6 are decades" <|
   let ts := logTicks 1 1e6 7
   check (ts == [1, 10, 100, 1000, 10000, 100000, 1000000]) s!"{ts}"
 
+private def logMultiplesKnown : TestCase := .mk "Log ticks at chosen multiples fill each decade" <|
+  let a := logTicksAt .oneTwoFive 1 100 6
+  let b := logTicksAt .integers 1 30 6
+  let c := logTicksAt .oneTwoFive 3 700 6
+  let minor := (logTicksAt .integers 1 100 6).filter fun t => !(logTicksAt .oneTwoFive 1 100 6).contains t
+  do
+    check (a == [1, 2, 5, 10, 20, 50, 100]) s!"{a}"
+    check (b == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30]) s!"{b}"
+    check (c == [5, 10, 20, 50, 100, 200, 500]) s!"{c}"
+    check (minor.length == 12 && minor.head? == some 3) s!"{minor}"
+    check (logTicksAt .decades 1 1e6 7 == logTicks 1 1e6 7) "decades unchanged"
+    check (logTicksAt .integers 1 1e6 4 == logTicks 1 1e6 4) "thins over many decades"
+    check (logScaleTicksAt .oneTwoFive ⟨1, 100, 0, 800⟩ 6 == a) "scale adapter"
+    check (logTicksAt .oneTwoFive 0 100 6).isEmpty "from zero"
+    check (logTicksAt .integers (-1) 100 6).isEmpty "negative"
+    check (logTicksAt .integers 1 1 6).isEmpty "empty range"
+    check (logTicksAt .integers (0.0 / 0.0) 10 6).isEmpty "nan"
+
+private def logMultiplesProps : TestCase := .mk "Multiple ticks lie in the range, ascend, and include every multiple in it" <|
+  forAll 2000 (fun g =>
+    let (e, g) := g.below 20
+    let (w, g) := g.below 12
+    let (m, g) := g.below 9
+    let lo := (m + 1).toFloat * Float.pow 10 (e.toFloat - 10)
+    ((lo, lo * Float.pow 10 (w.toFloat / 4 + 0.3)), g)) fun (lo, hi) => do
+    let ts := logTicksAt .integers lo hi 6
+    check (within lo hi ts) s!"outside: {lo} {hi} {ts}"
+    check (ascending ts) s!"not ascending: {ts}"
+    let want := (List.range 40).flatMap fun i => (List.range 9).map fun m =>
+      (m + 1).toFloat * Float.pow 10 (i.toFloat - 12)
+    let inside := want.filter fun t => lo ≤ t && t ≤ hi
+    if hi.log10 - lo.log10 ≤ 6 && inside.length ≥ 2 then
+      check (inside == ts) s!"missing: {lo.log10} {hi.log10} {ts.map Float.log10} {inside.map Float.log10}"
+    else pure ()
+
 private def symlogKnown : TestCase := .mk "Symlog ticks mirror the decades about zero within the range" <|
   do
     let ts := symlogTicks (-1000) 1000 1 7
@@ -149,6 +184,6 @@ private def scaleAdapters : TestCase := .mk "Scale adapters tick the scale's vis
 
 def tests : List TestCase :=
   [linearInRange, linearSpacing, linearPresent, linearReversed, degenerate, linearKnown, logTests,
-    logKnown, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps]
+    logKnown, logMultiplesKnown, logMultiplesProps, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps]
 
 end InkproofAxisTest.TickTests

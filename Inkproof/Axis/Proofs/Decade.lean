@@ -54,4 +54,53 @@ theorem decadeTicks_valid [DecidableLE α] [DecidableLT α] {fl : α → Int} (h
       simp only [hcast]
       exact cover_hi hfl hst (by omega)
 
+theorem mem_multipleTicks {β : Type u} [Mul β] [LE β] [LT β] [DecidableLE β] {pw : Int → β} {ms : List β}
+    {lo hi : β} {e0 e1 : Int} {t : β} :
+    t ∈ multipleTicks pw ms lo hi e0 e1 ↔
+      (∃ e, e0 ≤ e ∧ e ≤ e1 ∧ ∃ m ∈ ms, t = m * pw e) ∧ lo ≤ t ∧ t ≤ hi := by
+  simp only [multipleTicks, List.mem_filter, List.mem_flatMap, List.mem_range, List.mem_map,
+    Bool.and_eq_true, decide_eq_true_eq]
+  constructor
+  · rintro ⟨⟨i, hi', m, hm, rfl⟩, h1, h2⟩
+    exact ⟨⟨e0 + i, by omega, by omega, m, hm, rfl⟩, h1, h2⟩
+  · rintro ⟨⟨e, h1, h2, m, hm, rfl⟩, h3, h4⟩
+    exact ⟨⟨(e - e0).toNat, by omega, m, hm, by congr 2; omega⟩, h3, h4⟩
+
+omit [Field α] [OrderedRing α] [Std.LawfulOrderLT α] [Std.IsLinearOrder α] in
+theorem valid_of_pairwise [DecidableLE α] [DecidableLT α] {lo hi : α} :
+    ∀ l : List α, l.Pairwise (· < ·) → (∀ x ∈ l, lo ≤ x ∧ x ≤ hi) → Ticks.Valid lo hi l = true
+  | [], _, _ => by simp [Ticks.Valid]
+  | [x], _, h => by
+    have := h x (by simp)
+    simp [Ticks.Valid, this.1, this.2]
+  | x :: y :: rest, hp, h => by
+    have hx := h x (by simp)
+    have hxy : x < y := (List.pairwise_cons.1 hp).1 y (by simp)
+    have ih := valid_of_pairwise (y :: rest) (List.pairwise_cons.1 hp).2
+      (fun z hz => h z (List.mem_cons_of_mem _ hz))
+    simp only [Ticks.Valid, Bool.and_eq_true, decide_eq_true_eq]
+    exact ⟨⟨hx.1, hxy⟩, ih⟩
+
+omit [Std.LawfulOrderLT α] in
+/-- With ascending positive multiples, positive powers, and every multiple of a lower power below every multiple of a higher one, the multiple ticks are strictly ascending and inside the range. -/
+theorem multipleTicks_valid [DecidableLE α] [DecidableLT α] {pw : Int → α} {ms : List α} {lo hi : α}
+    {e0 e1 : Int} (hms : ms.Pairwise (· < ·)) (hpos : ∀ e, 0 < pw e)
+    (hsep : ∀ e e' : Int, e < e' → ∀ m ∈ ms, ∀ m' ∈ ms, m * pw e < m' * pw e') :
+    Ticks.Valid lo hi (multipleTicks pw ms lo hi e0 e1) = true := by
+  apply valid_of_pairwise
+  · refine List.Pairwise.filter _ ?_
+    rw [List.pairwise_flatMap]
+    refine ⟨fun i _ => ?_, ?_⟩
+    · rw [List.pairwise_map]
+      exact hms.imp fun {a b} hab => OrderedRing.mul_lt_mul_of_pos_right hab (hpos _)
+    · exact List.pairwise_lt_range.imp fun {i j} hij => by
+        intro x hx y hy
+        simp only [List.mem_map] at hx hy
+        obtain ⟨m, hm, rfl⟩ := hx
+        obtain ⟨m', hm', rfl⟩ := hy
+        exact hsep _ _ (by omega) m hm m' hm'
+  · intro x hx
+    have := mem_multipleTicks.1 hx
+    exact ⟨this.2.1, this.2.2⟩
+
 end Inkproof.Axis.Proofs

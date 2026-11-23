@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.12.0]
+
+- `logTicksAt` and `logScaleTicksAt` tick a log axis at 1, 2 and 5 or at every integer within each decade, chosen by `LogMultiples`.
+
 ## [0.11.0]
 
 - `posixZone` builds the offset function for `monthTicks` and `durationTicksAt` from a POSIX TZ rule, in its own module `Inkproof.Axis.PosixZone`.

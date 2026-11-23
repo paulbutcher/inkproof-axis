@@ -23,6 +23,10 @@ def durationScaleTicks (s : Linear Float) (target : Nat) : List Float :=
 def logScaleTicks (s : Log Float) (target : Nat) : List Float :=
   logTicks s.domainStart s.domainEnd target
 
+/-- `logTicksAt` over the visible domain of a log scale. -/
+def logScaleTicksAt (m : LogMultiples) (s : Log Float) (target : Nat) : List Float :=
+  logTicksAt m s.domainStart s.domainEnd target
+
 /-- The categories to label over `[lo, hi]`, in band index units, the visible part of a categorical scale. -/
 def categoricalScaleTicks {κ : Type u} (s : Categorical κ Float) (lo hi : Float) (target : Nat) : List κ :=
   (categoricalIndices s.categories.size lo hi target).filterMap (s.categories[·]?)

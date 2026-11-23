@@ -70,6 +70,31 @@ def logTicks (lo hi : Float) (target : Nat) : List Float :=
       if ts.length ≥ 2 && Ticks.Valid lo hi ts then ts else linearTicks lo hi target
   | none => []
 
+/-- Where within each decade a log axis is ticked: at powers of ten only, at 1, 2 and 5, or at every integer from 1 to 9. -/
+inductive LogMultiples where
+  | decades
+  | oneTwoFive
+  | integers
+
+/-- The multiples of a power of ten that `m` ticks, ascending. -/
+def LogMultiples.mantissas : LogMultiples → List Nat
+  | .decades => [1]
+  | .oneTwoFive => [1, 2, 5]
+  | .integers => [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+/-- Ticks for a log scale over `[lo, hi]` at the multiples `m` of each power of ten, as `logTicks` does for `.decades`. When the range spans more than `target` decades they thin to powers of ten as `logTicks` does, and when fewer than two multiples fall inside they fall back to `linearTicks`. To label only some of the ticks, take `logTicksAt` for a sparser `m` as well and keep the ticks of the denser set that it lacks as minor ticks. -/
+def logTicksAt (m : LogMultiples) (lo hi : Float) (target : Nat) : List Float :=
+  match m, ordered lo hi with
+  | .decades, _ => logTicks lo hi target
+  | _, none => []
+  | _, some (lo, hi) =>
+    if lo ≤ 0 then []
+    else if hi.log10 - lo.log10 > (max target 1).toFloat then logTicks lo hi target
+    else
+      let ts := multipleTicks (fun e => Float.pow 10 (Float.ofInt e)) (m.mantissas.map Nat.toFloat) lo hi
+        (floorInt lo.log10 - 1) (floorInt hi.log10 + 1)
+      if ts.length ≥ 2 && Ticks.Valid lo hi ts then ts else linearTicks lo hi target
+
 /-- `ps` negated and reversed, then zero, then `ps`: the ticks of a symmetric axis from those of its positive side. -/
 def mirrorAboutZero {α : Type} [Neg α] [OfNat α 0] (ps : List α) : List α :=
   (ps.map (-·)).reverse ++ 0 :: ps
