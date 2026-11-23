@@ -68,7 +68,21 @@ private def known : TestCase := .mk "Grouping and separators follow the locale" 
     check (tickLabels .de [0.5, 1, 1500.5] == ["0,5", "1,0", "1.500,5"]) s!"{tickLabels .de [0.5, 1, 1500.5]}"
     check (tickLabels .fr [1000, 2000] == ["1\u202F000", "2\u202F000"]) s!"{tickLabels .fr [1000, 2000]}"
 
+private def formats : TestCase := .mk "Number formats: compact units, fixed precision, single values" <|
+  do
+    let c : NumberFormat := { compact := NumberFormat.short }
+    check (c.formatAll [0, 1500, 3000000] == ["0.0", "1.5k", "3.0M"]) s!"{c.formatAll [0, 1500, 3000000]}"
+    check (c.format 1200 == some "1.2k") s!"{c.format 1200}"
+    check (c.format 999 == some "999") s!"{c.format 999}"
+    check (c.format (-2.5e9) == some "-2.5B") s!"{c.format (-2.5e9)}"
+    check (({ compact := NumberFormat.short, locale := .de } : NumberFormat).format 1200 == some "1,2k") "de"
+    let f : NumberFormat := { precision := some 1 }
+    check (f.format 3.14159 == some "3.1") s!"{f.format 3.14159}"
+    check (f.format 1234.56 == some "1,234.6") s!"{f.format 1234.56}"
+    check (f.format (0.0 / 0.0) == none) "nan"
+    check ((NumberFormat.mk .en none []).format 2.5 == some "2.5") "default precision"
+
 def tests : List TestCase :=
-  [labelsMatchTicks, localesAgree, precisionFollowsSpacing, degenerate, known]
+  [labelsMatchTicks, localesAgree, precisionFollowsSpacing, degenerate, known, formats]
 
 end InkproofAxisTest.LabelTests

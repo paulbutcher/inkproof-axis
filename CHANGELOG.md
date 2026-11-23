@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.13.0]
+
+- `NumberFormat` writes numbers in a locale with fixed or automatic decimals and compact units, and `tickLabels` uses it.
+
 ## [0.12.0]
 
 - `logTicksAt` and `logScaleTicksAt` tick a log axis at 1, 2 and 5 or at every integer within each decade, chosen by `LogMultiples`.

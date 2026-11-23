@@ -11,4 +11,5 @@ import Inkproof.Axis.Proofs.Label
 import Inkproof.Axis.Proofs.TimeLabel
 import Inkproof.Axis.Proofs.Layout
 import Inkproof.Axis.Proofs.MonthTicks
+import Inkproof.Axis.Proofs.NumberFormat
 import Inkproof.Axis.Proofs.Symlog

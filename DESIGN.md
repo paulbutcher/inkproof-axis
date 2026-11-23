@@ -33,6 +33,7 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 - `parseChars_formatChars` proves a label reads back as its mantissa and precision; `label_adjacent_ne` proves adjacent grid ticks at least one unit apart get different labels.
 - `tickLabels` chooses the fewest decimals (up to 15) that show every tick and keep adjacent labels distinct, and returns no labels if none does. Like the Float tick front ends it is tested, not proved.
 - Digits are written with core's `Nat.digitChar`, whose `Char` for a digit below 10 is the one we prove things about. Core's `Nat.toDigits` is not used: it is most-significant-first with no fixed width (labels need exactly `p` decimals) and has no value lemmas (only `length_toDigits_pos` and `length_toDigits_le_iff` for length), so `lsDigits`, `digitCount` and `digitsValue` stay.
+- `NumberFormat` is the one format: a `Locale`, a precision (`none` is the fewest decimals above) and compact suffixes for 10 ^ 3, 10 ^ 6 and so on, whose text the caller supplies like the locale's separators. `tickLabels` is `formatAll` with the defaults, so other libraries can format values the way tick labels do. It sits beside `Locale` rather than inside it so adding the choices does not change `Locale.mk`.
 ## Time labels
 
 - A tick is whole seconds after 1970-01-01 UTC; core's `civilFromDays` gives its date. `timeLabel` picks a `TimeLabel` from the step: seconds when the step is not a whole number of minutes, a date at the first tick of a day (of a month, for steps of a day or more).
