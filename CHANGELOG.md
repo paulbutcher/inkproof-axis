@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.13.1]
+
+- The README no longer pins a version or lists supported versions.
+
 ## [0.13.0]
 
 - `NumberFormat` writes numbers in a locale with fixed or automatic decimals and compact units, and `tickLabels` uses it.
