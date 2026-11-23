@@ -2,19 +2,15 @@
 
 Ticks and labels for chart axes, for every scale kind. Part of Inkproof. Released under the Apache 2.0 license; see `LICENSE`.
 
-## Supported versions
-
-| Inkproof.Axis | Lean | Inkproof.Scale | Inkproof.Float |
-| --- | --- | --- | --- |
-| `v0.5.2` | `leanprover/lean4:v4.35.0` | `v0.6.1` | `v0.5.0` |
-
-The library builds natively and under Lasm from the same source.
+The library builds natively and under Lasm from the same source. `lakefile.lean` records the Lean, Inkproof.Scale and Inkproof.Float versions it builds against.
 
 ## Using it
 
 ```lean
-require «inkproof-axis» from git "https://github.com/paulbutcher/inkproof-axis" @ "v0.5.2"
+require «inkproof-axis» from git "https://github.com/paulbutcher/inkproof-axis" @ "vX.Y.Z"
 ```
+
+Replace `vX.Y.Z` with the latest release tag; `CHANGELOG.md` lists the releases.
 
 `import Inkproof.Axis` brings in everything a program runs. `import Inkproof.Axis.Proofs` adds the published theorems, which a browser build need not link.
 
