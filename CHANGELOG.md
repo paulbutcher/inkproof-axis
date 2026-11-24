@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.14.0]
+
+- `timeTickContextsAt`, `timeContextsAt` and `timeContexts` give the year or day a time axis label starts, to draw as a second line.
+
 ## [0.13.1]
 
 - The README no longer pins a version or lists supported versions.
