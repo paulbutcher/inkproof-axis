@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0]
+
+- Linear steps from a pixel spacing and 2.5 multiples, and labels without trailing zeros (inkproof-axis#57).
+- Log ticks at 1, 2 and 5 or every integer in any base, minor ticks apart from labelled ones, and `b^n` power labels (inkproof-axis#56).
+- Time ticks and labels in a chosen style, with clock steps from a pixel spacing (inkproof-axis#55).
+- `transformTicks`: ticks at the steps of a scale given by a transform pair, for Weibull and arcsinh axes (inkproof-axis#58).
+
 ## [0.14.0]
 
 - `timeTickContextsAt`, `timeContextsAt` and `timeContexts` give the year or day a time axis label starts, to draw as a second line.
