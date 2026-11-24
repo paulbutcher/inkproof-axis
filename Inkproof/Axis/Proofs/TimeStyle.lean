@@ -62,7 +62,10 @@ theorem render_numeric_date : (TimeLabel.date 3 29).renderWith numeric [] = "3/2
 theorem render_numeric_date_dayFirst :
     (TimeLabel.date 3 29).renderWith { date := .numeric '.' true } [] = "29.3".toList := by decide +kernel
 
-theorem render_numeric_month : (TimeLabel.month 3).renderWith numeric [] = "3".toList := by decide +kernel
+theorem render_numeric_month : (TimeLabel.month 4).renderWith numeric [] = "4/1".toList := by decide +kernel
+
+theorem render_month_numeric (sep : Char) (dayFirst : Bool) (m : Nat) (months : List String) :
+    (TimeLabel.month m).renderWith { date := .numeric sep dayFirst } months = numericDate sep dayFirst m 1 := rfl
 
 /-- The label of the tick at 2020-03-29 03:00 UTC on an hourly axis, in 12-hour style. -/
 theorem timeLabelsWith_hourly_example :

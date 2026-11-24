@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.16.0]
+
+- With a numeric date style, the tick on the first of a month is labelled month/day, not the bare month (inkproof-axis#64).
+
 ## [0.15.0]
 
 - Linear steps from a pixel spacing and 2.5 multiples, and labels without trailing zeros (inkproof-axis#57).

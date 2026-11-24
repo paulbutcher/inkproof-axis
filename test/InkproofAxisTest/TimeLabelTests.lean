@@ -73,8 +73,8 @@ private def styled : TestCase := .mk "Styled labels: 12-hour clock, numeric date
     check (timeLabelsWith style months 3600 [day + 3 * 3600, day + 15 * 3600, day + 12 * 3600, day] == ["3am", "3pm", "12pm", "7/17"]) s!"{timeLabelsWith style months 3600 [day + 3 * 3600, day + 15 * 3600, day + 12 * 3600, day]}"
     check (timeLabelsWith style months 900 [day + 15 * 3600 + 1800] == ["3:30pm"]) "minutes"
     check (timeLabelsWith style months 1 [day + 15 * 3600 + 1805] == ["3:30:05pm"]) "seconds"
-    check (timeLabelsWith style months 86400 [day, day + 86400 * 15] == ["7/17", "8"]) "days"
-    check (timeLabelsWith style months 86400 [day - 16 * 86400] == ["7"]) "first of month"
+    check (timeLabelsWith style months 86400 [day, day + 86400 * 15] == ["7/17", "8/1"]) "days"
+    check (timeLabelsWith style months 86400 [day - 16 * 86400] == ["7/1"]) "first of month"
     check (timeLabelsWith {} months 3600 [day + 3 * 3600] == timeLabels months 3600 [day + 3 * 3600]) "default"
     let cs := timeContextsWith style months 3600 [day + 3 * 3600, day + 4 * 3600, day + 22 * 3600 + 3600 * 3]
     check (cs == [some "7/17/20", none, some "7/18/20"]) s!"{cs}"

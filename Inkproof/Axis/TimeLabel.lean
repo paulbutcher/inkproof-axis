@@ -96,7 +96,7 @@ def TimeLabel.renderWith (style : TimeStyle) (months : List String) : TimeLabel 
   | .month m =>
     match style.date with
     | .named => TimeLabel.render months (.month m)
-    | .numeric .. => formatDecimal 0 m
+    | .numeric sep dayFirst => numericDate sep dayFirst m 1
 
 /-- The number written by two digit characters. -/
 def twoValue (a b : Char) : Option Nat :=

@@ -173,9 +173,10 @@ theorem Inkproof.Axis.Proofs.render_h12_midnight : Inkproof.Axis.TimeLabel.rende
 theorem Inkproof.Axis.Proofs.render_h12_noon : Inkproof.Axis.TimeLabel.renderWith Inkproof.Axis.Proofs.twelve✝ [] (Inkproof.Axis.TimeLabel.clock 12 0 Option.none) = "12pm".toList
 theorem Inkproof.Axis.Proofs.render_h12_on_the_hour : Inkproof.Axis.TimeLabel.renderWith Inkproof.Axis.Proofs.twelve✝ [] (Inkproof.Axis.TimeLabel.clock 3 0 Option.none) = "3am".toList
 theorem Inkproof.Axis.Proofs.render_h12_seconds : Inkproof.Axis.TimeLabel.renderWith Inkproof.Axis.Proofs.twelve✝ [] (Inkproof.Axis.TimeLabel.clock 15 30 (Option.some 5)) = "3:30:05pm".toList
+theorem Inkproof.Axis.Proofs.render_month_numeric : ∀ (sep : Char) (dayFirst : Bool) (m : Nat) (months : List String), Inkproof.Axis.TimeLabel.renderWith { date := Inkproof.Axis.DateStyle.numeric sep dayFirst } months (Inkproof.Axis.TimeLabel.month m) = Inkproof.Axis.numericDate sep dayFirst m 1
 theorem Inkproof.Axis.Proofs.render_numeric_date : Inkproof.Axis.TimeLabel.renderWith Inkproof.Axis.Proofs.numeric✝ [] (Inkproof.Axis.TimeLabel.date 3 29) = "3/29".toList
 theorem Inkproof.Axis.Proofs.render_numeric_date_dayFirst : Inkproof.Axis.TimeLabel.renderWith { date := Inkproof.Axis.DateStyle.numeric '.' Bool.true } [] (Inkproof.Axis.TimeLabel.date 3 29) = "29.3".toList
-theorem Inkproof.Axis.Proofs.render_numeric_month : Inkproof.Axis.TimeLabel.renderWith Inkproof.Axis.Proofs.numeric✝ [] (Inkproof.Axis.TimeLabel.month 3) = "3".toList
+theorem Inkproof.Axis.Proofs.render_numeric_month : Inkproof.Axis.TimeLabel.renderWith Inkproof.Axis.Proofs.numeric✝ [] (Inkproof.Axis.TimeLabel.month 4) = "4/1".toList
 theorem Inkproof.Axis.Proofs.scaleByPow10_neg : ∀ (m : Float) (k : Int), ¬0 ≤ k → Inkproof.Axis.scaleByPow10 m k = m / Float.pow 10 (Float.ofInt (-k))
 theorem Inkproof.Axis.Proofs.scaleByPow10_nonneg : ∀ (m : Float) (k : Int), 0 ≤ k → Inkproof.Axis.scaleByPow10 m k = m * Float.pow 10 (Float.ofInt k)
 theorem Inkproof.Axis.Proofs.scaleDown_eq : ∀ (j : Nat) (x : Float), Inkproof.Axis.NumberFormat.scaleDown j x = x / (1000 ^ j).toFloat
