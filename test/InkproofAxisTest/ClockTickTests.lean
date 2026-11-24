@@ -56,6 +56,22 @@ private def properties : TestCase := .mk "Clock ticks ascend and fall on the loc
     for t in ts do
       check ((t + london t) % step == 0 && lo ≤ t && t ≤ lo + w) s!"{t}"
 
-def tests : List TestCase := [dailyAcrossChange, halfHourZone, repeatedHour, labelled, properties]
+private def spaced : TestCase := .mk "A pixel spacing chooses the step: 12 days over 700 pixels at 50 is daily" <|
+  let lo := 1585440000.0
+  do
+    check (durationStepSpaced (12 * 86400) 700 50 == some 86400) s!"{durationStepSpaced (12 * 86400) 700 50}"
+    check (durationStepSpaced (12 * 86400) 700 100 == some 172800) "wider spacing"
+    check (durationStepSpaced 3600 700 50 == some 300) s!"{durationStepSpaced 3600 700 50}"
+    check (durationStepSpaced 0.5 700 50 == some 0.05) s!"{durationStepSpaced 0.5 700 50}"
+    check (durationStepSpaced (1000 * 86400) 700 50 == some (100 * 86400)) s!"{durationStepSpaced (1000 * 86400) 700 50}"
+    check (durationStepSpaced 10 700 0 == none) "no spacing"
+    let (step, ts) := durationTicksAtSpaced (fun _ => 0) lo (lo + 12 * 86400) 700 50
+    check (step == 86400) s!"{step}"
+    check (ts.length == 13 || ts.length == 12) s!"{ts.length}"
+    check ((ts.zip ts.tail).all fun (a, b) => b - a == 86400) "daily"
+    let (_, empty) := durationTicksAtSpaced (fun _ => 0) lo lo 700 50
+    check empty.isEmpty "empty range"
+
+def tests : List TestCase := [dailyAcrossChange, halfHourZone, repeatedHour, labelled, properties, spaced]
 
 end InkproofAxisTest.ClockTickTests

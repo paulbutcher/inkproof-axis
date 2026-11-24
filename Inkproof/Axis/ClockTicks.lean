@@ -27,4 +27,23 @@ def durationTicksAt (off : Int → Int) (lo hi : Float) (target : Nat) : Float �
     (step, (clockTicks off step.floor.toUInt64.toNat a.ceil.toInt64.toInt b.floor.toInt64.toInt).map Float.ofInt)
   else (step, durationTicks lo hi target)
 
+/-- The shortest entry of `durationSteps` at least `span * spacing / extent` seconds, the step that keeps ticks `spacing` pixels apart over `extent` pixels showing `span` seconds; below a second, a 1, 2 or 5 times a power of ten, and above the table a power-of-ten number of days. `none` unless that length is positive and finite. -/
+def durationStepSpaced (span extent spacing : Float) : Option Float :=
+  let raw := span * spacing / extent
+  if raw.isFinite && 0 < raw then
+    if raw < 1 then spacedStep [1, 2, 5] span extent spacing
+    else match durationSteps.find? (raw ≤ ·) with
+      | some s => some s
+      | none => (spacedStep [1, 2, 5] (span / 86400) extent spacing).map (· * 86400)
+  else none
+
+/-- `durationTicksAt` with the step chosen by `durationStepSpaced` for `extent` pixels and `spacing` pixels between ticks, so that 12 days over 700 pixels at 50 gives a daily step. No ticks, with a zero step, where the range is empty, reversed, not finite or over 10 ^ 15 seconds in size, or the step is below a second or no step can be chosen. -/
+def durationTicksAtSpaced (off : Int → Int) (lo hi extent spacing : Float) : Float × List Float :=
+  match ordered lo hi, durationStepSpaced (hi - lo) extent spacing with
+  | some (a, b), some step =>
+    if a.abs < 1e15 && b.abs < 1e15 && 1 ≤ step && step < 1e15 then
+      (step, (clockTicks off step.floor.toUInt64.toNat a.ceil.toInt64.toInt b.floor.toInt64.toInt).map Float.ofInt)
+    else (step, [])
+  | _, _ => (0, [])
+
 end Inkproof.Axis

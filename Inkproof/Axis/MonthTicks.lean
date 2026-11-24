@@ -55,4 +55,24 @@ def timeTickContextsAt (off : Int → Int) (months : List String) (step : Float)
     timeContextsAt off months step.floor.toUInt64.toNat (ticks.map fun t => t.floor.toInt64.toInt)
   else []
 
+/-- `timeLabelsAt` with the writing of `style`. -/
+def timeLabelsAtWith (style : TimeStyle) (off : Int → Int) (months : List String) (step : Nat) (ticks : List Int) : List String :=
+  timeLabelsWith style months step (ticks.map fun t => t + off t)
+
+/-- `timeTickLabelsAt` with the writing of `style`. -/
+def timeTickLabelsAtWith (style : TimeStyle) (off : Int → Int) (months : List String) (step : Float) (ticks : List Float) : List String :=
+  if ticks.all fun t => t.isFinite && t.abs < 1e15 && step.isFinite && 0 ≤ step && step < 1e15 then
+    timeLabelsAtWith style off months step.floor.toUInt64.toNat (ticks.map fun t => t.floor.toInt64.toInt)
+  else []
+
+/-- `timeContextsAt` with the writing of `style`. -/
+def timeContextsAtWith (style : TimeStyle) (off : Int → Int) (months : List String) (step : Nat) (ticks : List Int) : List (Option String) :=
+  timeContextsWith style months step (ticks.map fun t => t + off t)
+
+/-- `timeTickContextsAt` with the writing of `style`. -/
+def timeTickContextsAtWith (style : TimeStyle) (off : Int → Int) (months : List String) (step : Float) (ticks : List Float) : List (Option String) :=
+  if ticks.all fun t => t.isFinite && t.abs < 1e15 && step.isFinite && 0 ≤ step && step < 1e15 then
+    timeContextsAtWith style off months step.floor.toUInt64.toNat (ticks.map fun t => t.floor.toInt64.toInt)
+  else []
+
 end Inkproof.Axis

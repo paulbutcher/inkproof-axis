@@ -56,6 +56,48 @@ def TimeLabel.render (months : List String) : TimeLabel → List Char
   | .date m d => monthName months m ++ ' ' :: formatDecimal 0 d
   | .month m => monthName months m
 
+/-- How a clock time is written: `h24` as 04:00 or 16:30, `h12` as 4am or 4:30pm with the given morning and afternoon marks (which belong to the locale). -/
+inductive ClockStyle where
+  | h24
+  | h12 (am pm : String)
+
+/-- How a calendar date is written: `named` as Mar 29, or `numeric` as 3/29 (3/29/20 with a year) with the given separator, the day first when `dayFirst`. -/
+inductive DateStyle where
+  | named
+  | numeric (sep : Char) (dayFirst : Bool)
+
+/-- The writing of the labels of a time axis: its clock times, its calendar dates, and the dates of its context lines (which also carry the two-digit year when numeric). -/
+structure TimeStyle where
+  clock : ClockStyle := .h24
+  date : DateStyle := .named
+  contextDate : DateStyle := .named
+
+/-- The hour on a 12-hour clock, 1 to 12. -/
+def hour12 (h : Nat) : Nat := if h % 12 = 0 then 12 else h % 12
+
+/-- A month and day written as digits in the order and with the separator the style gives. -/
+def numericDate (sep : Char) (dayFirst : Bool) (m d : Nat) : List Char :=
+  if dayFirst then formatDecimal 0 d ++ sep :: formatDecimal 0 m else formatDecimal 0 m ++ sep :: formatDecimal 0 d
+
+/-- The text of a label in the given style, with month `m` (1 for January) named `months[m - 1]` where the style names months. -/
+def TimeLabel.renderWith (style : TimeStyle) (months : List String) : TimeLabel → List Char
+  | .clock h m s =>
+    match style.clock with
+    | .h24 => TimeLabel.render months (.clock h m s)
+    | .h12 am pm =>
+      let mark := (if h < 12 then am else pm).toList
+      match s with
+      | none => if m = 0 then formatDecimal 0 (hour12 h) ++ mark else formatDecimal 0 (hour12 h) ++ ':' :: twoDigits m ++ mark
+      | some s => formatDecimal 0 (hour12 h) ++ ':' :: twoDigits m ++ ':' :: twoDigits s ++ mark
+  | .date m d =>
+    match style.date with
+    | .named => TimeLabel.render months (.date m d)
+    | .numeric sep dayFirst => numericDate sep dayFirst m d
+  | .month m =>
+    match style.date with
+    | .named => TimeLabel.render months (.month m)
+    | .numeric .. => formatDecimal 0 m
+
 /-- The number written by two digit characters. -/
 def twoValue (a b : Char) : Option Nat :=
   if a.isDigit && b.isDigit then some (digitsValue [a, b]) else none
@@ -101,5 +143,25 @@ def timeContext (months : List String) (step : Nat) (prev : Option Int) (t : Int
 /-- `timeContext` of each tick, for ticks as `timeLabels` takes them. -/
 def timeContexts (months : List String) (step : Nat) (ticks : List Int) : List (Option String) :=
   (ticks.zip (none :: ticks.map some)).map fun (t, p) => timeContext months step p t
+
+/-- `timeLabels` with the writing of `style`. -/
+def timeLabelsWith (style : TimeStyle) (months : List String) (step : Nat) (ticks : List Int) : List String :=
+  ticks.map fun t => String.ofList ((timeLabel step t).renderWith style months)
+
+/-- `timeContext` with the writing of `style`: a numeric context date is month, day and the two-digit year. -/
+def timeContextWith (style : TimeStyle) (months : List String) (step : Nat) (prev : Option Int) (t : Int) : Option String :=
+  let c := civilFromDays (t / 86400)
+  let p := prev.map fun q => civilFromDays (q / 86400)
+  match timeLabel step t with
+  | .clock .. =>
+    if p.map (·.2) = some c.2 then none
+    else match style.contextDate with
+      | .named => some (String.ofList ((TimeLabel.date c.2.1 c.2.2).render months))
+      | .numeric sep dayFirst => some (String.ofList (numericDate sep dayFirst c.2.1 c.2.2 ++ sep :: twoDigits (c.1 % 100).toNat))
+  | _ => if p.map (·.1) = some c.1 then none else some (toString c.1)
+
+/-- `timeContextWith` of each tick, for ticks as `timeLabels` takes them. -/
+def timeContextsWith (style : TimeStyle) (months : List String) (step : Nat) (ticks : List Int) : List (Option String) :=
+  (ticks.zip (none :: ticks.map some)).map fun (t, p) => timeContextWith style months step p t
 
 end Inkproof.Axis
