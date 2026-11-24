@@ -8,6 +8,7 @@ import Inkproof.Axis.Proofs.ClockTicks
 import Inkproof.Axis.Proofs.Decade
 import Inkproof.Axis.Proofs.Grid
 import Inkproof.Axis.Proofs.Label
+import Inkproof.Axis.Proofs.LogBase
 import Inkproof.Axis.Proofs.TimeLabel
 import Inkproof.Axis.Proofs.Layout
 import Inkproof.Axis.Proofs.MonthTicks

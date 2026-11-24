@@ -19,6 +19,8 @@ Replace `vX.Y.Z` with the latest release tag; `CHANGELOG.md` lists the releases.
 - Choose tick positions for a linear axis: `linearTicks` for a range, `linearScaleTicks` for an `Inkproof.Scale.Linear`; the step comes from `niceStep`.
 - Choose tick positions for a logarithmic axis, at powers of ten: `logTicks`, `logScaleTicks`, over `decadeTicks` and `decadeExponents`.
 - Choose tick positions for a logarithmic axis at 1, 2 and 5 or at every integer within each decade, with the denser set's extra ticks usable as minor gridlines: `logTicksAt` with a `LogMultiples`, `logScaleTicksAt`, over `multipleTicks`.
+- Choose tick positions for a logarithmic axis in any base, powers of two for base 2, at powers, at 1, 2 and 5 or at every integer multiple, and the minor ticks kept apart from the labelled ones for minor gridlines: `logTicksIn`, `logTicksAtIn`, `logMinorTicksIn` (and `logMinorTicks` in base ten), over `logBase` and `powBase`.
+- Write a tick that is a power as plain text, 2^24 or 10^-3: `powerLabel`, `powerLabels`, `powerText`.
 - Choose tick positions for a symmetric log or arcsinh axis, zero and powers of ten mirrored about it: `symlogTicks`, over `mirrorAboutZero`.
 - Choose tick positions for a categorical (band) axis: `categoricalTicks`, `categoricalIndices`, and `categoricalScaleTicks` for an `Inkproof.Scale.Categorical`.
 - Choose tick positions for an elapsed-time axis, at clock intervals from a second to a week: `durationTicks`, `durationScaleTicks`, `durationStep`, `durationSteps`.

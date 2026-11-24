@@ -56,44 +56,68 @@ def durationTicks (lo hi : Float) (target : Nat) : List Float :=
   | some (lo, hi) => gridTicks lo hi (durationStep (hi - lo) target)
   | none => []
 
-/-- Ticks for a log scale over the positive range `[lo, hi]`: powers of ten, every `k`th when there are more than `target`. A range holding fewer than two powers of ten falls back to `linearTicks`, and one reaching zero or below has none. -/
-def logTicks (lo hi : Float) (target : Nat) : List Float :=
+/-- The logarithm in base `b`, exact at powers of two and of ten. -/
+def logBase (b : Nat) (x : Float) : Float :=
+  if b == 2 then x.log2 else if b == 10 then x.log10 else x.log / b.toFloat.log
+
+/-- `b ^ e`. -/
+def powBase (b : Nat) (e : Int) : Float := Float.pow b.toFloat (Float.ofInt e)
+
+/-- Ticks for a log scale of base `base` over the positive range `[lo, hi]`: powers of `base`, every `k`th when there are more than `target`. A range holding fewer than two powers falls back to `linearTicks`, and one reaching zero or below, or a base below 2, has none. -/
+def logTicksIn (base : Nat) (lo hi : Float) (target : Nat) : List Float :=
   match ordered lo hi with
   | some (lo, hi) =>
-    if lo ≤ 0 then []
+    if lo ≤ 0 || base < 2 then []
     else
       letI : IntCast Float := ⟨Float.ofInt⟩
       letI : NatCast Float := ⟨fun n => n.toFloat⟩
-      let decades := hi.log10 - lo.log10
+      let decades := logBase base hi - logBase base lo
       let stride := (decades / (max target 1).toFloat).ceil.toUInt64.toNat |> max 1
-      let ts := decadeTicks floorInt Float.log10 (fun e => Float.pow 10 (Float.ofInt e)) lo hi stride
+      let ts := decadeTicks floorInt (logBase base) (powBase base) lo hi stride
       if ts.length ≥ 2 && Ticks.Valid lo hi ts then ts else linearTicks lo hi target
   | none => []
 
-/-- Where within each decade a log axis is ticked: at powers of ten only, at 1, 2 and 5, or at every integer from 1 to 9. -/
+/-- Ticks for a log scale over the positive range `[lo, hi]`: powers of ten, every `k`th when there are more than `target`. A range holding fewer than two powers of ten falls back to `linearTicks`, and one reaching zero or below has none. -/
+def logTicks (lo hi : Float) (target : Nat) : List Float := logTicksIn 10 lo hi target
+
+/-- Where within each power of the base a log axis is ticked: at powers only, at 1, 2 and 5, or at every integer from 1 below the base. -/
 inductive LogMultiples where
   | decades
   | oneTwoFive
   | integers
 
-/-- The multiples of a power of ten that `m` ticks, ascending. -/
-def LogMultiples.mantissas : LogMultiples → List Nat
+/-- The multiples of a power of `base` that `m` ticks, ascending: those of 1, 2 and 5, or of 1 to 9, below the base. -/
+def LogMultiples.mantissasIn (base : Nat) : LogMultiples → List Nat
   | .decades => [1]
-  | .oneTwoFive => [1, 2, 5]
-  | .integers => [1, 2, 3, 4, 5, 6, 7, 8, 9]
+  | .oneTwoFive => [1, 2, 5].filter (· < base)
+  | .integers => (List.range (base - 1)).map (· + 1)
 
-/-- Ticks for a log scale over `[lo, hi]` at the multiples `m` of each power of ten, as `logTicks` does for `.decades`. When the range spans more than `target` decades they thin to powers of ten as `logTicks` does, and when fewer than two multiples fall inside they fall back to `linearTicks`. To label only some of the ticks, take `logTicksAt` for a sparser `m` as well and keep the ticks of the denser set that it lacks as minor ticks. -/
-def logTicksAt (m : LogMultiples) (lo hi : Float) (target : Nat) : List Float :=
+/-- The multiples of a power of ten that `m` ticks, ascending. -/
+def LogMultiples.mantissas (m : LogMultiples) : List Nat := m.mantissasIn 10
+
+/-- Ticks for a log scale of base `base` over `[lo, hi]` at the multiples `m` of each power of the base, as `logTicksIn` does for `.decades`. When the range spans more than `target` powers they thin to powers as `logTicksIn` does, and when fewer than two multiples fall inside they fall back to `linearTicks`. For minor ticks apart from the labelled ones, see `logMinorTicksIn`. -/
+def logTicksAtIn (base : Nat) (m : LogMultiples) (lo hi : Float) (target : Nat) : List Float :=
   match m, ordered lo hi with
-  | .decades, _ => logTicks lo hi target
+  | .decades, _ => logTicksIn base lo hi target
   | _, none => []
   | _, some (lo, hi) =>
-    if lo ≤ 0 then []
-    else if hi.log10 - lo.log10 > (max target 1).toFloat then logTicks lo hi target
+    if lo ≤ 0 || base < 2 then []
+    else if logBase base hi - logBase base lo > (max target 1).toFloat then logTicksIn base lo hi target
     else
-      let ts := multipleTicks (fun e => Float.pow 10 (Float.ofInt e)) (m.mantissas.map Nat.toFloat) lo hi
-        (floorInt lo.log10 - 1) (floorInt hi.log10 + 1)
+      let ts := multipleTicks (powBase base) ((m.mantissasIn base).map Nat.toFloat) lo hi
+        (floorInt (logBase base lo) - 1) (floorInt (logBase base hi) + 1)
       if ts.length ≥ 2 && Ticks.Valid lo hi ts then ts else linearTicks lo hi target
+
+/-- `logTicksAtIn` in base ten. -/
+def logTicksAt (m : LogMultiples) (lo hi : Float) (target : Nat) : List Float := logTicksAtIn 10 m lo hi target
+
+/-- The minor ticks of a log axis of base `base` whose labelled ticks are at the multiples `m`: those at every integer multiple of a power of the base that the labelled ticks lack, ascending. None where the labelled ticks are already every integer multiple, as for base 2, or thinned to powers. -/
+def logMinorTicksIn (base : Nat) (m : LogMultiples) (lo hi : Float) (target : Nat) : List Float :=
+  let labelled := logTicksAtIn base m lo hi target
+  (logTicksAtIn base .integers lo hi target).filter fun t => !labelled.contains t
+
+/-- `logMinorTicksIn` in base ten. -/
+def logMinorTicks (m : LogMultiples) (lo hi : Float) (target : Nat) : List Float := logMinorTicksIn 10 m lo hi target
 
 /-- `ps` negated and reversed, then zero, then `ps`: the ticks of a symmetric axis from those of its positive side. -/
 def mirrorAboutZero {α : Type} [Neg α] [OfNat α 0] (ps : List α) : List α :=

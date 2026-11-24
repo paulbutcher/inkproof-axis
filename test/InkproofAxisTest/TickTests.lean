@@ -182,8 +182,45 @@ private def scaleAdapters : TestCase := .mk "Scale adapters tick the scale's vis
     check (logScaleTicks ⟨1, 1000, 0, 800⟩ 5 == logTicks 1 1000 5) "log"
     check (categoricalScaleTicks c (-1) 10 4 == ["a", "b", "c", "d"]) "categorical"
 
+private def logBaseKnown : TestCase := .mk "Log ticks in other bases, minor ticks and power labels" <|
+  do
+    let two := logTicksIn 2 1 1024 12
+    check (two == (List.range 11).map fun i => Float.pow 2 i.toFloat) s!"{two}"
+    check (logTicksIn 2 3 70 4 == [4, 16, 64]) s!"{logTicksIn 2 3 70 4}"
+    check (logTicksIn 10 1 1e6 7 == logTicks 1 1e6 7) "base 10 is logTicks"
+    check (logTicksIn 1 1 100 5).isEmpty "base 1"
+    check (logTicksAtIn 3 .integers 1 27 5 == [1, 2, 3, 6, 9, 18, 27]) s!"{logTicksAtIn 3 .integers 1 27 5}"
+    check ((logMinorTicks .oneTwoFive 1 100 6) == [3, 4, 6, 7, 8, 9, 30, 40, 60, 70, 80, 90]) s!"{logMinorTicks .oneTwoFive 1 100 6}"
+    check (logMinorTicks .decades 1 100 6 == (logTicksAt .integers 1 100 6).filter fun t => t != 1 && t != 10 && t != 100) "decades"
+    check (logMinorTicksIn 2 .decades 1 64 8).isEmpty "base 2 has none"
+    check (logMinorTicks .integers 1 100 6).isEmpty "none beyond the labelled"
+    check (powerLabel .en 2 16777216 == some "2^24") s!"{powerLabel .en 2 16777216}"
+    check (powerLabel .en 10 0.001 == some "10^-3") s!"{powerLabel .en 10 0.001}"
+    check (powerLabel .plain 2 0.5 == some "2^−1") s!"{powerLabel .plain 2 0.5}"
+    check (powerLabel .en 2 24 == none) "not a power"
+    check (powerLabel .en 2 0 == none && powerLabel .en 2 (-4) == none && powerLabel .en 1 4 == none) "outside"
+    check (powerLabels .en 2 [1, 2, 4] == ["2^0", "2^1", "2^2"]) "labels"
+    check (powerLabels .en 2 [1, 3] == []) "one not a power"
+
+private def logBaseProps : TestCase := .mk "Ticks in base 2 lie in the range, ascend and are powers; minor ticks are apart from the labelled ones" <|
+  forAll 2000 (fun g =>
+    let (e, g) := g.below 40
+    let (w, g) := g.below 12
+    let (m, g) := g.below 9
+    let lo := (m + 1).toFloat * Float.pow 2 (e.toFloat - 20)
+    ((lo, lo * Float.pow 2 (w.toFloat / 2 + 0.3)), g)) fun (lo, hi) => do
+    let ts := logTicksIn 2 lo hi 6
+    check (within lo hi ts && ascending ts) s!"base 2: {lo} {hi} {ts}"
+    let lbl := logTicksAtIn 3 .oneTwoFive lo hi 6
+    let minor := logMinorTicksIn 3 .oneTwoFive lo hi 6
+    check (within lo hi minor && ascending minor) s!"minor: {minor}"
+    check (minor.all fun t => !lbl.contains t) "minor among labelled"
+    let ten := logMinorTicks .oneTwoFive lo hi 6
+    check (within lo hi ten && ascending ten) s!"minor ten: {ten}"
+    check (ten.all fun t => !(logTicksAt .oneTwoFive lo hi 6).contains t) "minor ten among labelled"
+
 def tests : List TestCase :=
   [linearInRange, linearSpacing, linearPresent, linearReversed, degenerate, linearKnown, logTests,
-    logKnown, logMultiplesKnown, logMultiplesProps, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps]
+    logKnown, logMultiplesKnown, logMultiplesProps, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps, logBaseKnown, logBaseProps]
 
 end InkproofAxisTest.TickTests
