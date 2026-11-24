@@ -65,6 +65,31 @@ def linearTicks (lo hi : Float) (target : Nat) : List Float :=
   | some (lo, hi) => gridTicks lo hi (niceStep (hi - lo) target)
   | none => []
 
+/-- `ts` without the entries that repeat the one after them. -/
+def dropRepeats (ts : List Float) : List Float :=
+  ts.foldr (fun t acc => if acc.head? == some t then acc else t :: acc) []
+
+/-- The `fix (inv u)` for the values `us`, ascending, in `[lo, hi]`, and without repeats, which rounding in `fix` can produce: the values are in order when `increasing`, and in reverse order otherwise. -/
+def backTicks (increasing : Bool) (fix inv : Float → Float) (lo hi : Float) (us : List Float) : List Float :=
+  let ts := us.map fun u => fix (inv u)
+  dropRepeats ((if increasing then ts else ts.reverse).filter fun t => lo ≤ t && t ≤ hi)
+
+/-- `backTicks`, or no ticks unless they are strictly ascending within `[lo, hi]`. -/
+def mapBack (increasing : Bool) (fix inv : Float → Float) (lo hi : Float) (us : List Float) : List Float :=
+  let ts := backTicks increasing fix inv lo hi us
+  if Ticks.Valid lo hi ts then ts else []
+
+/-- Ticks for a scale given by a forward transform `fwd`, strictly monotone over the range, and its inverse `inv`, over the visible range between `lo` and `hi`: evenly spaced values of `fwd` at a 1, 2 or 5 times a power of ten step, about `target` of them, mapped back with `inv` and rounded by `round`. Ticks the rounding moves outside the range are dropped. A range that is empty, not finite or that `fwd` maps to a single value has no ticks; a reversed range is read as its ascending interval. -/
+def transformTicks (fwd inv round : Float → Float) (lo hi : Float) (target : Nat) : List Float :=
+  match ordered lo hi with
+  | some (lo, hi) =>
+    let a := fwd lo
+    let b := fwd hi
+    match ordered a b with
+    | some (u0, u1) => mapBack (a < b) round inv lo hi (gridTicks u0 u1 (niceStep (u1 - u0) target))
+    | none => []
+  | none => []
+
 /-- Ticks for a linear scale over the visible range between `lo` and `hi` drawn over `extent` pixels, at multiples of the `spacedStep` for `spacing` pixels between ticks. A reversed range is read as its ascending interval; an empty or non-finite range has no ticks. -/
 def spacedLinearTicks (multiples : List Float) (lo hi extent spacing : Float) : List Float :=
   match ordered lo hi with

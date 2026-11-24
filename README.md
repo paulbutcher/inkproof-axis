@@ -20,6 +20,7 @@ Replace `vX.Y.Z` with the latest release tag; `CHANGELOG.md` lists the releases.
 - Choose a linear axis's step from the pixels wanted between ticks and the multiples a step may take (1, 2, 2.5, 5 as `stepMultiples`): `spacedLinearTicks`, `linearScaleTicksSpaced`, `spacedStep`, over `gridTicks`.
 - Choose tick positions for a logarithmic axis, at powers of ten: `logTicks`, `logScaleTicks`, over `decadeTicks` and `decadeExponents`.
 - Choose tick positions for a logarithmic axis at 1, 2 and 5 or at every integer within each decade, with the denser set's extra ticks usable as minor gridlines: `logTicksAt` with a `LogMultiples`, `logScaleTicksAt`, over `multipleTicks`.
+- Choose tick positions for any scale given by a forward and inverse transform (Weibull, arcsinh, a caller's own), at nice steps in the transformed space mapped back and rounded by a function the caller gives: `transformTicks`, over `mapBack`, `backTicks`, `gridTicks`.
 - Choose tick positions for a logarithmic axis in any base, powers of two for base 2, at powers, at 1, 2 and 5 or at every integer multiple, and the minor ticks kept apart from the labelled ones for minor gridlines: `logTicksIn`, `logTicksAtIn`, `logMinorTicksIn` (and `logMinorTicks` in base ten), over `logBase` and `powBase`.
 - Write a tick that is a power as plain text, 2^24 or 10^-3: `powerLabel`, `powerLabels`, `powerText`.
 - Choose tick positions for a symmetric log or arcsinh axis, zero and powers of ten mirrored about it: `symlogTicks`, over `mirrorAboutZero`.

@@ -15,3 +15,4 @@ import Inkproof.Axis.Proofs.MonthTicks
 import Inkproof.Axis.Proofs.NumberFormat
 import Inkproof.Axis.Proofs.SpacedStep
 import Inkproof.Axis.Proofs.Symlog
+import Inkproof.Axis.Proofs.Transform

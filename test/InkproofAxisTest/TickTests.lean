@@ -182,6 +182,47 @@ private def scaleAdapters : TestCase := .mk "Scale adapters tick the scale's vis
     check (logScaleTicks ⟨1, 1000, 0, 800⟩ 5 == logTicks 1 1000 5) "log"
     check (categoricalScaleTicks c (-1) 10 4 == ["a", "b", "c", "d"]) "categorical"
 
+private def roundDigits (digits : Nat) (x : Float) : Float :=
+  if x == 0 then x
+  else
+    let k : Int := digits - 1 - (Float.floor x.abs.log10).toInt64.toInt
+    if 0 ≤ k then (x * Float.pow 10 (Float.ofInt k)).round / Float.pow 10 (Float.ofInt k)
+    else (x / Float.pow 10 (Float.ofInt (-k))).round * Float.pow 10 (Float.ofInt (-k))
+
+private def asinhFwd (x : Float) : Float := Float.log (x + Float.sqrt (x * x + 1))
+
+private def weibullFwd (p : Float) : Float := Float.log (-Float.log (1 - p))
+
+private def weibullInv (u : Float) : Float := 1 - Float.exp (-Float.exp u)
+
+private def transformKnown : TestCase := .mk "Transform ticks sit at the transformed scale's own steps" <|
+  do
+    check (transformTicks id id id 0 100 5 == linearTicks 0 100 5) "identity"
+    check (transformTicks id id id 100 0 5 == linearTicks 0 100 5) "reversed"
+    check (transformTicks (fun x => -x) (fun x => -x) id 0 100 5 == linearTicks 0 100 5) "decreasing"
+    check (transformTicks id id id 1 1 5 == []) "empty"
+    check (transformTicks (fun _ => 0) id id 0 1 5 == []) "unspread"
+    let ts := transformTicks asinhFwd Float.sinh (roundDigits 3) (-1000) 1000 7
+    check (ts.length ≥ 3) s!"{ts}"
+    check (ts.contains 0) s!"zero: {ts}"
+
+private def transformProps : TestCase := .mk "Transform ticks lie in the range, ascend and are rounded back values of even steps" <|
+  forAll 2000 (fun g =>
+    let (m, g) := g.below 1000
+    let (e, g) := g.below 6
+    let (t, g) := g.below 9
+    ((-(m.toFloat + 1) * Float.pow 10 e.toFloat, (m.toFloat + 1) * Float.pow 10 e.toFloat, t + 2), g)) fun (lo, hi, t) => do
+    let ts := transformTicks asinhFwd Float.sinh (roundDigits 3) lo hi t
+    check (within lo hi ts) s!"outside range: {ts}"
+    check (ascending ts) s!"not ascending: {ts}"
+    let step := niceStep (asinhFwd hi - asinhFwd lo) t
+    let us := ts.map asinhFwd
+    check (us.all fun u => ((u / step) - (u / step).round).abs < 0.01) s!"not on the steps: {us}"
+
+private def weibullProps : TestCase := .mk "Weibull ticks lie in the range and ascend" <|
+  forAll 200 (fun g => let (m, g) := g.below 40; (((m.toFloat + 1) / 100, 0.99 - m.toFloat / 100 / 3), g)) fun (lo, hi) => do
+    let ts := transformTicks weibullFwd weibullInv (roundDigits 3) lo hi 6
+    check (within lo hi ts && ascending ts) s!"weibull: {ts}"
 private def spacedKnown : TestCase := .mk "Spaced linear steps follow the pixel spacing and the multiples" <|
   do
     check (spacedStep stepMultiples 120000 1000 40 == some 5000) s!"{spacedStep stepMultiples 120000 1000 40}"
@@ -241,6 +282,6 @@ private def logBaseProps : TestCase := .mk "Ticks in base 2 lie in the range, as
 
 def tests : List TestCase :=
   [linearInRange, linearSpacing, linearPresent, linearReversed, degenerate, linearKnown, logTests,
-    logKnown, logMultiplesKnown, logMultiplesProps, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps, spacedKnown, spacedProps, logBaseKnown, logBaseProps]
+    logKnown, logMultiplesKnown, logMultiplesProps, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps, spacedKnown, spacedProps, transformKnown, transformProps, weibullProps, logBaseKnown, logBaseProps]
 
 end InkproofAxisTest.TickTests

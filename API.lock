@@ -114,10 +114,14 @@ theorem Inkproof.Axis.Proofs.mantissasIn_oneTwoFive : ∀ (base : Nat), Inkproof
 theorem Inkproof.Axis.Proofs.mantissasIn_ten_integers : Inkproof.Axis.LogMultiples.mantissasIn 10 Inkproof.Axis.LogMultiples.integers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 theorem Inkproof.Axis.Proofs.mantissasIn_two_integers : Inkproof.Axis.LogMultiples.mantissasIn 2 Inkproof.Axis.LogMultiples.integers = [1]
 theorem Inkproof.Axis.Proofs.mantissas_eq : ∀ (m : Inkproof.Axis.LogMultiples), m.mantissas = Inkproof.Axis.LogMultiples.mantissasIn 10 m
+theorem Inkproof.Axis.Proofs.mapBack_valid : ∀ (increasing : Bool) (fix inv : Float → Float) (lo hi : Float) (us : List Float), Inkproof.Axis.mapBack increasing fix inv lo hi us = [] ∨ Inkproof.Axis.Ticks.Valid lo hi (Inkproof.Axis.mapBack increasing fix inv lo hi us) = Bool.true
+theorem Inkproof.Axis.Proofs.mem_backTicks : ∀ (increasing : Bool) (fix inv : Float → Float) (lo hi : Float) (us : List Float) (t : Float), t ∈ Inkproof.Axis.backTicks increasing fix inv lo hi us → ∃ u, u ∈ us ∧ t = fix (inv u)
+theorem Inkproof.Axis.Proofs.mem_dropRepeats : ∀ (ts : List Float) (t : Float), t ∈ Inkproof.Axis.dropRepeats ts → t ∈ ts
 theorem Inkproof.Axis.Proofs.mem_formatAll_trim_auto : ∀ (fmt : Inkproof.Axis.NumberFormat), fmt.precision = Option.none → fmt.trim = Bool.true → ∀ (xs : List Float) (s : String), s ∈ fmt.formatAll xs → ∃ x, x ∈ xs ∧ ∃ p, p ≤ 15 ∧ s = fmt.formatTrimmedAt p x
 theorem Inkproof.Axis.Proofs.mem_gridTicks : ∀ (lo hi step t : Float), t ∈ Inkproof.Axis.gridTicks lo hi step → ∃ i, i < (Inkproof.Axis.Grid.cover (fun x => x.floor.toInt64.toInt) lo hi step).count ∧ t = (Inkproof.Axis.Grid.cover (fun x => x.floor.toInt64.toInt) lo hi step).value i
 theorem Inkproof.Axis.Proofs.mem_localInstants : ∀ {off : Int → Int} {w c : Int}, c ∈ Inkproof.Axis.localInstants off w ↔ c + off c = w ∧ (off (w - 86400) = w - c ∨ off (w + 86400) = w - c)
 theorem Inkproof.Axis.Proofs.mem_logMinorTicksIn : ∀ (base : Nat) (m : Inkproof.Axis.LogMultiples) (lo hi : Float) (target : Nat) (t : Float), t ∈ Inkproof.Axis.logMinorTicksIn base m lo hi target ↔ t ∈ Inkproof.Axis.logTicksAtIn base Inkproof.Axis.LogMultiples.integers lo hi target ∧ (Inkproof.Axis.logTicksAtIn base m lo hi target).contains t = Bool.false
+theorem Inkproof.Axis.Proofs.mem_mapBack : ∀ (increasing : Bool) (fix inv : Float → Float) (lo hi : Float) (us : List Float) (t : Float), t ∈ Inkproof.Axis.mapBack increasing fix inv lo hi us → ∃ u, u ∈ us ∧ t = fix (inv u)
 theorem Inkproof.Axis.Proofs.mem_monthStarts : ∀ {n : Nat} {a b s : Int}, s ∈ Inkproof.Axis.monthStarts n a b ↔ ∃ k, k % ↑(Max.max n 1) = 0 ∧ s = 86400 * Inkproof.Axis.monthStartDay k ∧ a ≤ s ∧ s ≤ b
 theorem Inkproof.Axis.Proofs.mem_multipleTicks : ∀ {β : Type u} [inst : Mul β] [inst_1 : LE β] [inst_2 : LT β] [inst_3 : DecidableLE β] {pw : Int → β} {ms : List β} {lo hi : β} {e0 e1 : Int} {t : β}, t ∈ Inkproof.Axis.multipleTicks pw ms lo hi e0 e1 ↔ (∃ e, e0 ≤ e ∧ e ≤ e1 ∧ ∃ m, m ∈ ms ∧ t = m * pw e) ∧ lo ≤ t ∧ t ≤ hi
 theorem Inkproof.Axis.Proofs.mem_multiplesIn : ∀ {n : Nat} {a b w : Int}, w ∈ Inkproof.Axis.multiplesIn n a b ↔ w % ↑(Max.max n 1) = 0 ∧ a ≤ w ∧ w ≤ b
@@ -182,6 +186,9 @@ theorem Inkproof.Axis.Proofs.timeLabelsAt_eq : ∀ (off : Int → Int) (months :
 theorem Inkproof.Axis.Proofs.timeLabels_eq : ∀ (months : List String) (step : Nat) (ticks : List Int), Inkproof.Axis.timeLabels months step ticks = List.map (fun t => String.ofList (Inkproof.Axis.TimeLabel.render months (Inkproof.Axis.timeLabel step t))) ticks
 theorem Inkproof.Axis.Proofs.timeTickContextsAt_eq : ∀ (off : Int → Int) (months : List String) (step : Float) (ticks : List Float), Inkproof.Axis.timeTickContextsAt off months step ticks = if (ticks.all fun t => t.isFinite && Decidable.decide (t.abs < 1e15) && step.isFinite && Decidable.decide (0 ≤ step) && Decidable.decide (step < 1e15)) = Bool.true then Inkproof.Axis.timeContextsAt off months step.floor.toUInt64.toNat (List.map (fun t => t.floor.toInt64.toInt) ticks) else []
 theorem Inkproof.Axis.Proofs.timeTickLabelsAt_eq : ∀ (off : Int → Int) (months : List String) (step : Float) (ticks : List Float), Inkproof.Axis.timeTickLabelsAt off months step ticks = if (ticks.all fun t => t.isFinite && Decidable.decide (t.abs < 1e15) && step.isFinite && Decidable.decide (0 ≤ step) && Decidable.decide (step < 1e15)) = Bool.true then Inkproof.Axis.timeLabelsAt off months step.floor.toUInt64.toNat (List.map (fun t => t.floor.toInt64.toInt) ticks) else []
+theorem Inkproof.Axis.Proofs.transformTicks_eq : ∀ (fwd inv round : Float → Float) (lo hi a b u0 u1 : Float) (target : Nat), Inkproof.Axis.ordered lo hi = Option.some (a, b) → Inkproof.Axis.ordered (fwd a) (fwd b) = Option.some (u0, u1) → Inkproof.Axis.transformTicks fwd inv round lo hi target = Inkproof.Axis.mapBack (Decidable.decide (fwd a < fwd b)) round inv a b (Inkproof.Axis.gridTicks u0 u1 (Inkproof.Axis.niceStep (u1 - u0) target))
+theorem Inkproof.Axis.Proofs.transformTicks_of_unordered : ∀ (fwd inv round : Float → Float) (lo hi : Float) (target : Nat), Inkproof.Axis.ordered lo hi = Option.none → Inkproof.Axis.transformTicks fwd inv round lo hi target = []
+theorem Inkproof.Axis.Proofs.transformTicks_of_unspread : ∀ (fwd inv round : Float → Float) (lo hi a b : Float) (target : Nat), Inkproof.Axis.ordered lo hi = Option.some (a, b) → Inkproof.Axis.ordered (fwd a) (fwd b) = Option.none → Inkproof.Axis.transformTicks fwd inv round lo hi target = []
 theorem Inkproof.Axis.Proofs.trimFraction_en_half : Inkproof.Axis.trimFraction Inkproof.Axis.Locale.en "0.50".toList = "0.5".toList
 theorem Inkproof.Axis.Proofs.trimFraction_en_hundred : Inkproof.Axis.trimFraction Inkproof.Axis.Locale.en "100".toList = "100".toList
 theorem Inkproof.Axis.Proofs.trimFraction_en_whole : Inkproof.Axis.trimFraction Inkproof.Axis.Locale.en "1.0".toList = "1".toList
@@ -214,6 +221,7 @@ constructor Inkproof.Axis.TimeLabel.clock : Nat → Nat → Option Nat → Inkpr
 constructor Inkproof.Axis.TimeLabel.date : Nat → Nat → Inkproof.Axis.TimeLabel
 constructor Inkproof.Axis.TimeLabel.month : Nat → Inkproof.Axis.TimeLabel
 def Inkproof.Axis.TimeLabel.render : List String → Inkproof.Axis.TimeLabel → List Char
+def Inkproof.Axis.backTicks : Bool → (Float → Float) → (Float → Float) → Float → Float → List Float → List Float
 def Inkproof.Axis.categoricalIndices : Nat → Float → Float → Nat → List Nat
 def Inkproof.Axis.categoricalScaleTicks : {κ : Type u} → Inkproof.Scale.Categorical κ Float → Float → Float → Nat → List κ
 def Inkproof.Axis.categoricalTicks : {α : Type u} → [IntCast α] → [Neg α] → (α → Int) → Nat → α → α → Nat → List Nat
@@ -221,6 +229,7 @@ def Inkproof.Axis.clearChain : {α : Type u} → {β : Type v} → [Add α] → 
 def Inkproof.Axis.clockTicks : (Int → Int) → Nat → Int → Int → List Int
 def Inkproof.Axis.decadeExponents : {α : Type u} → [IntCast α] → [NatCast α] → [Neg α] → [Div α] → (α → Int) → (α → α) → α → α → Nat → List Int
 def Inkproof.Axis.decadeTicks : {α : Type u} → [IntCast α] → [NatCast α] → [Neg α] → [Div α] → (α → Int) → (α → α) → (Int → α) → α → α → Nat → List α
+def Inkproof.Axis.dropRepeats : List Float → List Float
 def Inkproof.Axis.durationScaleTicks : Inkproof.Scale.Linear Float → Nat → List Float
 def Inkproof.Axis.durationStep : Float → Nat → Float
 def Inkproof.Axis.durationSteps : List Float
@@ -255,6 +264,7 @@ def Inkproof.Axis.logTicks : Float → Float → Nat → List Float
 def Inkproof.Axis.logTicksAt : Inkproof.Axis.LogMultiples → Float → Float → Nat → List Float
 def Inkproof.Axis.logTicksAtIn : Nat → Inkproof.Axis.LogMultiples → Float → Float → Nat → List Float
 def Inkproof.Axis.logTicksIn : Nat → Float → Float → Nat → List Float
+def Inkproof.Axis.mapBack : Bool → (Float → Float) → (Float → Float) → Float → Float → List Float → List Float
 def Inkproof.Axis.maxPrecision : Nat
 def Inkproof.Axis.mirrorAboutZero : {α : Type} → [Neg α] → [OfNat α 0] → List α → List α
 def Inkproof.Axis.monthIndex : Int → Int
@@ -294,6 +304,7 @@ def Inkproof.Axis.timeLabelsAt : (Int → Int) → List String → Nat → List 
 def Inkproof.Axis.timeTickContextsAt : (Int → Int) → List String → Float → List Float → List (Option String)
 def Inkproof.Axis.timeTickLabels : List String → Float → List Float → List String
 def Inkproof.Axis.timeTickLabelsAt : (Int → Int) → List String → Float → List Float → List String
+def Inkproof.Axis.transformTicks : (Float → Float) → (Float → Float) → (Float → Float) → Float → Float → Nat → List Float
 def Inkproof.Axis.trimFraction : Inkproof.Axis.Locale → List Char → List Char
 def Inkproof.Axis.twoDigits : Nat → List Char
 def Inkproof.Axis.twoValue : Char → Char → Option Nat
