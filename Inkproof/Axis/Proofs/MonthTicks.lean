@@ -169,4 +169,36 @@ theorem timeTickLabelsAt_eq (off : Int → Int) (months : List String) (step : F
         timeLabelsAt off months step.floor.toUInt64.toNat (ticks.map fun t => t.floor.toInt64.toInt)
       else [] := rfl
 
+theorem timeContexts_eq (months : List String) (step : Nat) (ticks : List Int) :
+    timeContexts months step ticks =
+      (ticks.zip (none :: ticks.map some)).map fun (t, p) => timeContext months step p t := rfl
+
+theorem timeContext_clock (months : List String) (step : Nat) (prev : Option Int) (t : Int) (h m s)
+    (hl : timeLabel step t = .clock h m s) :
+    timeContext months step prev t =
+      if (prev.map fun q => (civilFromDays (q / 86400)).2) = some (civilFromDays (t / 86400)).2 then none
+      else some (String.ofList ((TimeLabel.date (civilFromDays (t / 86400)).2.1
+        (civilFromDays (t / 86400)).2.2).render months)) := by
+  simp [timeContext, hl]
+
+theorem timeContext_year (months : List String) (step : Nat) (prev : Option Int) (t : Int)
+    (hl : ∀ h m s, timeLabel step t ≠ .clock h m s) :
+    timeContext months step prev t =
+      if (prev.map fun q => (civilFromDays (q / 86400)).1) = some (civilFromDays (t / 86400)).1 then none
+      else some (toString (civilFromDays (t / 86400)).1) := by
+  unfold timeContext
+  split
+  · rename_i h m s e; exact absurd e (hl h m s)
+  · simp
+
+theorem timeContextsAt_eq (off : Int → Int) (months : List String) (step : Nat) (ticks : List Int) :
+    timeContextsAt off months step ticks = timeContexts months step (ticks.map fun t => t + off t) := rfl
+
+theorem timeTickContextsAt_eq (off : Int → Int) (months : List String) (step : Float)
+    (ticks : List Float) :
+    timeTickContextsAt off months step ticks =
+      if ticks.all (fun t => t.isFinite && t.abs < 1e15 && step.isFinite && 0 ≤ step && step < 1e15) then
+        timeContextsAt off months step.floor.toUInt64.toNat (ticks.map fun t => t.floor.toInt64.toInt)
+      else [] := rfl
+
 end Inkproof.Axis.Proofs

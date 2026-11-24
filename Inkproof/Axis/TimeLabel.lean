@@ -90,4 +90,16 @@ def timeTickLabels (months : List String) (step : Float) (ticks : List Float) : 
     timeLabels months step.floor.toUInt64.toNat (ticks.map fun t => t.floor.toInt64.toInt)
   else []
 
+/-- The line a host draws under the label of the tick at `t`, given the previous tick `prev` (none for the first): the year where a date or month label starts a new year, or is first; the date where a clock label starts a new day, or is first. -/
+def timeContext (months : List String) (step : Nat) (prev : Option Int) (t : Int) : Option String :=
+  let c := civilFromDays (t / 86400)
+  let p := prev.map fun q => civilFromDays (q / 86400)
+  match timeLabel step t with
+  | .clock .. => if p.map (·.2) = some c.2 then none else some (String.ofList ((TimeLabel.date c.2.1 c.2.2).render months))
+  | _ => if p.map (·.1) = some c.1 then none else some (toString c.1)
+
+/-- `timeContext` of each tick, for ticks as `timeLabels` takes them. -/
+def timeContexts (months : List String) (step : Nat) (ticks : List Int) : List (Option String) :=
+  (ticks.zip (none :: ticks.map some)).map fun (t, p) => timeContext months step p t
+
 end Inkproof.Axis

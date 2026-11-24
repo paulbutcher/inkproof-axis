@@ -30,6 +30,14 @@ private def localMonths : TestCase := .mk "Month ticks follow the offset across 
     check (timeLabelsAt london months 2678400 ts == ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]) "labels"
     check (timeLabelsAt london months 3600 [1711926000 - 3600, 1711926000] == ["23:00", "Apr 1"]) "midnight"
 
+private def contexts : TestCase := .mk "Context lines name the year or the day where it changes" <|
+  do
+    let ts := monthTicks london 1 1701388800 1709251200
+    check (timeContextsAt london months 2678400 ts == [some "2023", some "2024", none, none]) "years"
+    let hs : List Int := [1711926000 - 7200, 1711926000 - 3600, 1711926000, 1711926000 + 3600]
+    check (timeContextsAt london months 3600 hs == [some "Mar 31", none, none, none]) "midnight has a label of its own"
+    check (timeContextsAt (fun _ => 0) months 28800 [3600, 32400, 61200, 90000] == [some "Jan 1", none, none, some "Jan 2"]) "days"
+
 private def properties : TestCase := .mk "Month ticks ascend and are local midnights on day 1" <|
   forAll 500 (fun g =>
     let (lo, g) := g.below 2000000000
@@ -43,6 +51,6 @@ private def properties : TestCase := .mk "Month ticks ascend and are local midni
       let l := t + london t
       check (l % 86400 == 0 && (civilFromDays (l / 86400)).2.2 == 1) s!"{t}"
 
-def tests : List TestCase := [utcMonths, localMonths, properties]
+def tests : List TestCase := [utcMonths, localMonths, contexts, properties]
 
 end InkproofAxisTest.MonthTickTests

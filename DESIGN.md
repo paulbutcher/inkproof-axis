@@ -38,6 +38,7 @@ Inkproof.Axis chooses ticks for every scale kind. Requirement IDs refer to `REQU
 
 - A tick is whole seconds after 1970-01-01 UTC; core's `civilFromDays` gives its date. `timeLabel` picks a `TimeLabel` from the step: seconds when the step is not a whole number of minutes, a date at the first tick of a day (of a month, for steps of a day or more).
 - Month names come from the caller; `MonthNames.Valid` (twelve distinct names without a space or colon) is the hypothesis under which `parseTimeLabel` reads a label back. `parse_timeLabel` proves the text reads back as a label showing the tick's own clock fields or a date it falls on.
+- `timeContexts` gives each tick an optional context string: the year when a date or month label is the first, or its year differs from the previous tick's; the date when a clock label is the first, or its day differs. A host draws it, when present, as a second text line under the label, anchored as the label is, spaced by a line height it measures.
 - `timeTickLabels` takes float ticks and gives no labels unless every tick is finite and under 10 ^ 15 seconds. Years are not shown.
 
 ## Label layout

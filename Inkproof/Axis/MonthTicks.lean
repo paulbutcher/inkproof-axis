@@ -45,4 +45,14 @@ def timeTickLabelsAt (off : Int → Int) (months : List String) (step : Float) (
     timeLabelsAt off months step.floor.toUInt64.toNat (ticks.map fun t => t.floor.toInt64.toInt)
   else []
 
+/-- `timeContexts` for ticks whose local time is `off t` seconds east of UTC at instant `t`. -/
+def timeContextsAt (off : Int → Int) (months : List String) (step : Nat) (ticks : List Int) : List (Option String) :=
+  timeContexts months step (ticks.map fun t => t + off t)
+
+/-- `timeContextsAt` for ticks and a step in float seconds, converted as in `timeTickLabelsAt`; none if a tick is not a finite number of seconds below 10 ^ 15 in size. -/
+def timeTickContextsAt (off : Int → Int) (months : List String) (step : Float) (ticks : List Float) : List (Option String) :=
+  if ticks.all fun t => t.isFinite && t.abs < 1e15 && step.isFinite && 0 ≤ step && step < 1e15 then
+    timeContextsAt off months step.floor.toUInt64.toNat (ticks.map fun t => t.floor.toInt64.toInt)
+  else []
+
 end Inkproof.Axis
