@@ -15,6 +15,10 @@ open Inkproof.Scale
 def linearScaleTicks (s : Linear Float) (target : Nat) : List Float :=
   linearTicks s.domainStart s.domainEnd target
 
+/-- `spacedLinearTicks` over the visible domain of a linear scale drawn over `extent` pixels. -/
+def linearScaleTicksSpaced (multiples : List Float) (s : Linear Float) (extent spacing : Float) : List Float :=
+  spacedLinearTicks multiples s.domainStart s.domainEnd extent spacing
+
 /-- Ticks over the visible domain of a scale of elapsed seconds (`Linear.ofDurations`). -/
 def durationScaleTicks (s : Linear Float) (target : Nat) : List Float :=
   durationTicks s.domainStart s.domainEnd target

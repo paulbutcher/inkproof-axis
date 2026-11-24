@@ -182,6 +182,26 @@ private def scaleAdapters : TestCase := .mk "Scale adapters tick the scale's vis
     check (logScaleTicks ⟨1, 1000, 0, 800⟩ 5 == logTicks 1 1000 5) "log"
     check (categoricalScaleTicks c (-1) 10 4 == ["a", "b", "c", "d"]) "categorical"
 
+private def spacedKnown : TestCase := .mk "Spaced linear steps follow the pixel spacing and the multiples" <|
+  do
+    check (spacedStep stepMultiples 120000 1000 40 == some 5000) s!"{spacedStep stepMultiples 120000 1000 40}"
+    check (spacedStep stepMultiples 120000 800 40 == some 10000) "10000"
+    check (spacedStep stepMultiples 1 800 40 == some 0.05) s!"{spacedStep stepMultiples 1 800 40}"
+    check (spacedStep stepMultiples 1 800 0 == none) "no spacing"
+    check (spacedStep [] 1 800 40 == none) "no multiples"
+    check (spacedLinearTicks stepMultiples 0 120000 1000 40 == (List.range 25).map (·.toFloat * 5000)) "ticks"
+    let s : Inkproof.Scale.Linear Float := ⟨0, 10, 0, 800⟩
+    check (linearScaleTicksSpaced stepMultiples s 800 40 == spacedLinearTicks stepMultiples 0 10 800 40) "scale"
+
+private def spacedProps : TestCase := .mk "Spaced linear ticks lie in the range, ascend and keep the spacing" <|
+  forAll 3000 genRange fun (lo, hi) => do
+    let ts := spacedLinearTicks stepMultiples lo hi 700 45
+    check (within lo hi ts) s!"outside range: {ts}"
+    check (ascending ts) s!"not ascending: {ts}"
+    match spacedStep stepMultiples (hi - lo) 700 45 with
+    | some step => check ((hi - lo) * 45 / 700 ≤ step) "step too short"
+    | none => check ts.isEmpty "ticks without a step"
+
 private def logBaseKnown : TestCase := .mk "Log ticks in other bases, minor ticks and power labels" <|
   do
     let two := logTicksIn 2 1 1024 12
@@ -221,6 +241,6 @@ private def logBaseProps : TestCase := .mk "Ticks in base 2 lie in the range, as
 
 def tests : List TestCase :=
   [linearInRange, linearSpacing, linearPresent, linearReversed, degenerate, linearKnown, logTests,
-    logKnown, logMultiplesKnown, logMultiplesProps, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps, logBaseKnown, logBaseProps]
+    logKnown, logMultiplesKnown, logMultiplesProps, symlogKnown, scaleAdapters, durationKnown, durationProps, categoricalProps, spacedKnown, spacedProps, logBaseKnown, logBaseProps]
 
 end InkproofAxisTest.TickTests

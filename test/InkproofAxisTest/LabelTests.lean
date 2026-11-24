@@ -80,9 +80,29 @@ private def formats : TestCase := .mk "Number formats: compact units, fixed prec
     check (f.format 3.14159 == some "3.1") s!"{f.format 3.14159}"
     check (f.format 1234.56 == some "1,234.6") s!"{f.format 1234.56}"
     check (f.format (0.0 / 0.0) == none) "nan"
-    check ((NumberFormat.mk .en none []).format 2.5 == some "2.5") "default precision"
+    check ((NumberFormat.mk .en none [] false).format 2.5 == some "2.5") "default precision"
+
+private def trimmedKnown : TestCase := .mk "Trimmed labels drop trailing zeros per label" <| do
+    let t : NumberFormat := { trim := true }
+    check (t.formatAll [0, 0.5, 1] == ["0", "0.5", "1"]) s!"{t.formatAll [0, 0.5, 1]}"
+    check (t.formatAll [100, 250] == ["100", "250"]) s!"{t.formatAll [100, 250]}"
+    check ((NumberFormat.mk .en (some 3) [] true).formatAll [1, 1.25] == ["1", "1.25"]) "fixed"
+    check ((NumberFormat.mk .de none NumberFormat.short true).formatAll [1500, 2000] == ["1,5k", "2k"]) "compact"
+    check (t.formatAll [0.1 + 0.2] == ["0.3"]) "noise"
+
+private def trimmedReadBack : TestCase := .mk "Trimmed labels read back as the ticks" <|
+  forAll 1000 genRange (fun (lo, hi) => do
+    let ts := linearTicks lo hi 6
+    let texts := ({ trim := true } : NumberFormat).formatAll ts
+    if !texts.isEmpty then
+      check (texts.length == ts.length) "one per tick"
+      for (t, s) in ts.zip texts do
+        match readBack .en s with
+        | some v => check ((v - t).abs ≤ 1e-9 * (1 + t.abs)) s!"{s} for {t}"
+        | none => check false s!"unreadable {s}"
+        check (!(s.endsWith "0") || !(s.contains '.')) s!"padded: {s}")
 
 def tests : List TestCase :=
-  [labelsMatchTicks, localesAgree, precisionFollowsSpacing, degenerate, known, formats]
+  [labelsMatchTicks, localesAgree, precisionFollowsSpacing, degenerate, known, formats, trimmedKnown, trimmedReadBack]
 
 end InkproofAxisTest.LabelTests

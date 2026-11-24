@@ -17,6 +17,7 @@ Replace `vX.Y.Z` with the latest release tag; `CHANGELOG.md` lists the releases.
 ## What it does
 
 - Choose tick positions for a linear axis: `linearTicks` for a range, `linearScaleTicks` for an `Inkproof.Scale.Linear`; the step comes from `niceStep`.
+- Choose a linear axis's step from the pixels wanted between ticks and the multiples a step may take (1, 2, 2.5, 5 as `stepMultiples`): `spacedLinearTicks`, `linearScaleTicksSpaced`, `spacedStep`, over `gridTicks`.
 - Choose tick positions for a logarithmic axis, at powers of ten: `logTicks`, `logScaleTicks`, over `decadeTicks` and `decadeExponents`.
 - Choose tick positions for a logarithmic axis at 1, 2 and 5 or at every integer within each decade, with the denser set's extra ticks usable as minor gridlines: `logTicksAt` with a `LogMultiples`, `logScaleTicksAt`, over `multipleTicks`.
 - Choose tick positions for a logarithmic axis in any base, powers of two for base 2, at powers, at 1, 2 and 5 or at every integer multiple, and the minor ticks kept apart from the labelled ones for minor gridlines: `logTicksIn`, `logTicksAtIn`, `logMinorTicksIn` (and `logMinorTicks` in base ten), over `logBase` and `powBase`.
@@ -26,7 +27,7 @@ Replace `vX.Y.Z` with the latest release tag; `CHANGELOG.md` lists the releases.
 - Choose tick positions for an elapsed-time axis, at clock intervals from a second to a week: `durationTicks`, `durationScaleTicks`, `durationStep`, `durationSteps`.
 - Generate evenly spaced ticks over any ordered field, with spacing, order and range proved: `Grid`, `Grid.cover`, `Grid.values`, `Ticks.Valid`.
 - Format tick values as number labels for a locale (decimal separator, digit grouping, minus sign), with the fewest decimals that keep adjacent labels distinct: `tickLabels`, `label`, `scaled`, `formatChars`, `Locale` (`en`, `de`, `fr`, `plain`).
-- Write any number as text in a locale, with fixed or automatic decimals and compact units (1.2k, 3M), the same format tick labels use: `NumberFormat` (`locale`, `precision`, `compact`; `NumberFormat.short`), `NumberFormat.format` for one value, `NumberFormat.formatAll` for a list, `NumberFormat.formatAt`, `floatLabel`.
+- Write any number as text in a locale, with fixed or automatic decimals and compact units (1.2k, 3M), the same format tick labels use: `NumberFormat` (`locale`, `precision`, `compact`, and `trim` to drop each label's own trailing zeros, so 0, 0.5, 1 read as such; `NumberFormat.short`), `NumberFormat.format` for one value, `NumberFormat.formatAll` for a list, `NumberFormat.formatAt`, `floatLabel`.
 - Group the digits of a number in runs with a separator, from the front of the list given: `groupRuns`.
 - Parse a formatted number back to its value and precision: `parseChars`, `ungroupWhole`, with `parse_label` proving the round trip.
 - Label a unix-time axis (seconds since 1970-01-01 UTC) with clock times and dates at the precision the step needs, the first tick of a day or month marked, month names from the caller: `timeTickLabels`, `timeLabels`, `timeLabel`, `TimeLabel`, with `parseTimeLabel` and `Proofs.parse_timeLabel` proving a label reads back as the tick's own fields.

@@ -17,6 +17,21 @@ def niceStep (span : Float) (target : Nat) : Float :=
   let f := raw / p
   (if f < 1.5 then 1 else if f < 3 then 2 else if f < 7 then 5 else 10) * p
 
+/-- The multiples of a power of ten that a step may take, as a value axis wants them: 1, 2, 2.5 and 5. -/
+def stepMultiples : List Float := [1, 2, 2.5, 5]
+
+/-- `m * 10 ^ k`, correctly rounded for either sign of `k`. -/
+def scaleByPow10 (m : Float) (k : Int) : Float :=
+  if 0 ≤ k then m * Float.pow 10 (Float.ofInt k) else m / Float.pow 10 (Float.ofInt (-k))
+
+/-- The least `m * 10 ^ k` with `m` in `multiples` (ascending, from 1 up to below 10) that is at least `span * spacing / extent`: the shortest step that keeps ticks `spacing` apart on an axis of `extent` pixels showing `span`. `none` unless that length is positive and finite. -/
+def spacedStep (multiples : List Float) (span extent spacing : Float) : Option Float :=
+  let raw := span * spacing / extent
+  if raw.isFinite && 0 < raw then
+    let k := floorInt raw.log10
+    ([k - 1, k, k + 1].flatMap fun e => multiples.map fun m => scaleByPow10 m e).find? (raw ≤ ·)
+  else none
+
 /-- Lengths in seconds that read naturally as clock and calendar intervals. -/
 def durationSteps : List Float :=
   [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 10800, 21600, 43200, 86400, 172800, 604800]
@@ -36,7 +51,7 @@ def ordered (lo hi : Float) : Option (Float × Float) :=
 private def maxTicks : Nat := 100000
 
 /-- The multiples of `step` in `[lo, hi]`, or no ticks unless the list is strictly increasing and within the interval, which floats cannot always deliver (a step below the spacing of floats at `hi`). -/
-private def gridTicks (lo hi step : Float) : List Float :=
+def gridTicks (lo hi step : Float) : List Float :=
   if step.isFinite && 0 < step then
     letI : IntCast Float := ⟨Float.ofInt⟩
     let g := Grid.cover floorInt lo hi step
@@ -48,6 +63,15 @@ private def gridTicks (lo hi step : Float) : List Float :=
 def linearTicks (lo hi : Float) (target : Nat) : List Float :=
   match ordered lo hi with
   | some (lo, hi) => gridTicks lo hi (niceStep (hi - lo) target)
+  | none => []
+
+/-- Ticks for a linear scale over the visible range between `lo` and `hi` drawn over `extent` pixels, at multiples of the `spacedStep` for `spacing` pixels between ticks. A reversed range is read as its ascending interval; an empty or non-finite range has no ticks. -/
+def spacedLinearTicks (multiples : List Float) (lo hi extent spacing : Float) : List Float :=
+  match ordered lo hi with
+  | some (lo, hi) =>
+    match spacedStep multiples (hi - lo) extent spacing with
+    | some step => gridTicks lo hi step
+    | none => []
   | none => []
 
 /-- Ticks for an elapsed-duration scale over a visible range in seconds, at natural clock intervals. -/
