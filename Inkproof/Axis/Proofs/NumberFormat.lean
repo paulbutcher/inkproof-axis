@@ -12,7 +12,7 @@ theorem floatLabel_eq (loc : Locale) (p : Nat) (x : Float) :
 
 theorem formatAt_eq (fmt : NumberFormat) (p : Nat) (x : Float) :
     fmt.formatAt p x = floatLabel fmt.locale p (NumberFormat.scaleDown (fmt.magnitude x) x) ++
-      fmt.suffix (fmt.magnitude x) := rfl
+      fmt.suffix (fmt.magnitude x) ++ fmt.unit := rfl
 
 theorem magnitude_of_compact_nil (fmt : NumberFormat) (h : fmt.compact = []) (x : Float) :
     fmt.magnitude x = 0 := by
@@ -40,7 +40,7 @@ theorem formatAll_of_precision_trim (fmt : NumberFormat) (p : Nat) (h : fmt.prec
 theorem formatTrimmedAt_eq (fmt : NumberFormat) (p : Nat) (x : Float) :
     fmt.formatTrimmedAt p x =
       String.ofList (trimFraction fmt.locale (floatLabel fmt.locale p
-        (NumberFormat.scaleDown (fmt.magnitude x) x)).toList) ++ fmt.suffix (fmt.magnitude x) := rfl
+        (NumberFormat.scaleDown (fmt.magnitude x) x)).toList) ++ fmt.suffix (fmt.magnitude x) ++ fmt.unit := rfl
 
 theorem formatAll_trim_auto (fmt : NumberFormat) (h : fmt.precision = none) (ht : fmt.trim = true)
     (xs : List Float) :
@@ -86,6 +86,37 @@ theorem mem_formatAll_trim_auto (fmt : NumberFormat) (h : fmt.precision = none) 
     obtain ⟨p, hp, rfl⟩ := formatTrimmedExact_spec fmt x s e
     exact ⟨x, hx, p, hp, rfl⟩
   · simp at hs
+
+theorem formatAt_unit (fmt : NumberFormat) (p : Nat) (x : Float) :
+    ∃ s, fmt.formatAt p x = s ++ fmt.unit := ⟨_, rfl⟩
+
+theorem formatTrimmedAt_unit (fmt : NumberFormat) (p : Nat) (x : Float) :
+    ∃ s, fmt.formatTrimmedAt p x = s ++ fmt.unit := ⟨_, rfl⟩
+
+/-- Every text `formatAll` gives ends in the unit. -/
+theorem formatAll_unit (fmt : NumberFormat) (xs : List Float) (s : String) (hs : s ∈ fmt.formatAll xs) :
+    ∃ t, s = t ++ fmt.unit := by
+  unfold NumberFormat.formatAll at hs
+  dsimp only at hs
+  split at hs
+  · split at hs
+    · obtain ⟨x, _, rfl⟩ := List.mem_map.mp hs
+      exact formatTrimmedAt_unit fmt _ x
+    · simp at hs
+  · split at hs
+    · rename_i texts hm
+      obtain ⟨x, _, e⟩ := mem_of_mapM_some _ xs texts hm s hs
+      obtain ⟨p, _, rfl⟩ := formatTrimmedExact_spec fmt x s e
+      exact formatTrimmedAt_unit fmt p x
+    · simp at hs
+  · split at hs
+    · obtain ⟨x, _, rfl⟩ := List.mem_map.mp hs
+      exact formatAt_unit fmt _ x
+    · simp at hs
+  · split at hs
+    · obtain ⟨x, _, rfl⟩ := List.mem_map.mp hs
+      exact formatAt_unit fmt _ x
+    · simp at hs
 
 theorem trimFraction_of_not_mem (loc : Locale) (cs : List Char) (h : loc.decimal ∉ cs) :
     trimFraction loc cs = cs := by

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.17.0]
+
+- `NumberFormat.unit`: a unit written after every label and its compact suffix (inkproof-axis#66).
+
 ## [0.16.0]
 
 - With a numeric date style, the tick on the first of a month is labelled month/day, not the bare month (inkproof-axis#64).

@@ -45,12 +45,13 @@ def Inkproof.Axis.NumberFormat.formatTrimmedAt : Inkproof.Axis.NumberFormat → 
 def Inkproof.Axis.NumberFormat.formatTrimmedExact : Inkproof.Axis.NumberFormat → Float → Option String
 field Inkproof.Axis.NumberFormat.locale : Inkproof.Axis.NumberFormat → Inkproof.Axis.Locale
 def Inkproof.Axis.NumberFormat.magnitude : Inkproof.Axis.NumberFormat → Float → Nat
-constructor Inkproof.Axis.NumberFormat.mk : Inkproof.Axis.Locale → Option Nat → List String → Bool → Inkproof.Axis.NumberFormat
+constructor Inkproof.Axis.NumberFormat.mk : Inkproof.Axis.Locale → Option Nat → List String → Bool → String → Inkproof.Axis.NumberFormat
 field Inkproof.Axis.NumberFormat.precision : Inkproof.Axis.NumberFormat → Option Nat
 def Inkproof.Axis.NumberFormat.scaleDown : Nat → Float → Float
 def Inkproof.Axis.NumberFormat.short : List String
 def Inkproof.Axis.NumberFormat.suffix : Inkproof.Axis.NumberFormat → Nat → String
 field Inkproof.Axis.NumberFormat.trim : Inkproof.Axis.NumberFormat → Bool
+field Inkproof.Axis.NumberFormat.unit : Inkproof.Axis.NumberFormat → String
 def Inkproof.Axis.PosixZone.offsetAt : Std.Time.TimeZone.RecurringRule → Int → Int
 theorem Inkproof.Axis.PosixZone.offsetAt_eq : ∀ (rule : Std.Time.TimeZone.RecurringRule) (t : Int), Inkproof.Axis.PosixZone.offsetAt rule t = (rule.timezoneAt (Std.Time.Timestamp.ofSecondsSinceUnixEpoch (Std.Time.Second.Offset.ofInt t))).offset.second.val
 def Inkproof.Axis.Proofs.IsFloor : {α : Type u} → [Lean.Grind.Field α] → [LE α] → [LT α] → (α → Int) → Prop
@@ -88,8 +89,11 @@ theorem Inkproof.Axis.Proofs.floatLabel_eq : ∀ (loc : Inkproof.Axis.Locale) (p
 theorem Inkproof.Axis.Proofs.formatAll_of_precision : ∀ (fmt : Inkproof.Axis.NumberFormat) (p : Nat), fmt.precision = Option.some p → fmt.trim = Bool.false → ∀ (xs : List Float), fmt.formatAll xs = [] ∨ fmt.formatAll xs = List.map (fmt.formatAt p) xs
 theorem Inkproof.Axis.Proofs.formatAll_of_precision_trim : ∀ (fmt : Inkproof.Axis.NumberFormat) (p : Nat), fmt.precision = Option.some p → fmt.trim = Bool.true → ∀ (xs : List Float), fmt.formatAll xs = [] ∨ fmt.formatAll xs = List.map (fmt.formatTrimmedAt p) xs
 theorem Inkproof.Axis.Proofs.formatAll_trim_auto : ∀ (fmt : Inkproof.Axis.NumberFormat), fmt.precision = Option.none → fmt.trim = Bool.true → ∀ (xs : List Float), fmt.formatAll xs = match List.mapM fmt.formatTrimmedExact xs with | Option.some texts => texts | Option.none => []
-theorem Inkproof.Axis.Proofs.formatAt_eq : ∀ (fmt : Inkproof.Axis.NumberFormat) (p : Nat) (x : Float), fmt.formatAt p x = Inkproof.Axis.floatLabel fmt.locale p (Inkproof.Axis.NumberFormat.scaleDown (fmt.magnitude x) x) ++ fmt.suffix (fmt.magnitude x)
-theorem Inkproof.Axis.Proofs.formatTrimmedAt_eq : ∀ (fmt : Inkproof.Axis.NumberFormat) (p : Nat) (x : Float), fmt.formatTrimmedAt p x = String.ofList (Inkproof.Axis.trimFraction fmt.locale (Inkproof.Axis.floatLabel fmt.locale p (Inkproof.Axis.NumberFormat.scaleDown (fmt.magnitude x) x)).toList) ++ fmt.suffix (fmt.magnitude x)
+theorem Inkproof.Axis.Proofs.formatAll_unit : ∀ (fmt : Inkproof.Axis.NumberFormat) (xs : List Float) (s : String), s ∈ fmt.formatAll xs → ∃ t, s = t ++ fmt.unit
+theorem Inkproof.Axis.Proofs.formatAt_eq : ∀ (fmt : Inkproof.Axis.NumberFormat) (p : Nat) (x : Float), fmt.formatAt p x = Inkproof.Axis.floatLabel fmt.locale p (Inkproof.Axis.NumberFormat.scaleDown (fmt.magnitude x) x) ++ fmt.suffix (fmt.magnitude x) ++ fmt.unit
+theorem Inkproof.Axis.Proofs.formatAt_unit : ∀ (fmt : Inkproof.Axis.NumberFormat) (p : Nat) (x : Float), ∃ s, fmt.formatAt p x = s ++ fmt.unit
+theorem Inkproof.Axis.Proofs.formatTrimmedAt_eq : ∀ (fmt : Inkproof.Axis.NumberFormat) (p : Nat) (x : Float), fmt.formatTrimmedAt p x = String.ofList (Inkproof.Axis.trimFraction fmt.locale (Inkproof.Axis.floatLabel fmt.locale p (Inkproof.Axis.NumberFormat.scaleDown (fmt.magnitude x) x)).toList) ++ fmt.suffix (fmt.magnitude x) ++ fmt.unit
+theorem Inkproof.Axis.Proofs.formatTrimmedAt_unit : ∀ (fmt : Inkproof.Axis.NumberFormat) (p : Nat) (x : Float), ∃ s, fmt.formatTrimmedAt p x = s ++ fmt.unit
 theorem Inkproof.Axis.Proofs.formatTrimmedExact_spec : ∀ (fmt : Inkproof.Axis.NumberFormat) (x : Float) (s : String), fmt.formatTrimmedExact x = Option.some s → ∃ p, p ≤ 15 ∧ s = fmt.formatTrimmedAt p x
 theorem Inkproof.Axis.Proofs.gridTicks_of_not_step : ∀ (lo hi step : Float), ¬(step.isFinite && Decidable.decide (0 < step)) = Bool.true → Inkproof.Axis.gridTicks lo hi step = []
 theorem Inkproof.Axis.Proofs.gridTicks_valid : ∀ (lo hi step : Float), Inkproof.Axis.gridTicks lo hi step = [] ∨ Inkproof.Axis.Ticks.Valid lo hi (Inkproof.Axis.gridTicks lo hi step) = Bool.true

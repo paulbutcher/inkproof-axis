@@ -6,12 +6,13 @@ import Inkproof.Axis.Label
 
 namespace Inkproof.Axis
 
-/-- How numbers are written: the locale's separators, the decimals (`none` chooses the fewest that show every value and keep neighbours distinct), whether each text drops its own trailing zeros, and the suffixes for 10 ^ 3, 10 ^ 6 and so on (empty for no compact notation). -/
+/-- How numbers are written: the locale's separators, the decimals (`none` chooses the fewest that show every value and keep neighbours distinct), whether each text drops its own trailing zeros, the suffixes for 10 ^ 3, 10 ^ 6 and so on (empty for no compact notation), and a unit written after every number and its compact suffix ("%", "B"). -/
 structure NumberFormat where
   locale : Locale := Locale.en
   precision : Option Nat := none
   compact : List String := []
   trim : Bool := false
+  unit : String := ""
 
 namespace NumberFormat
 
@@ -41,7 +42,7 @@ def floatLabel (loc : Locale) (p : Nat) (x : Float) : String :=
 /-- The text of `x` at `p` decimals, in the compact unit its size selects. -/
 def NumberFormat.formatAt (fmt : NumberFormat) (p : Nat) (x : Float) : String :=
   let j := fmt.magnitude x
-  floatLabel fmt.locale p (NumberFormat.scaleDown j x) ++ fmt.suffix j
+  floatLabel fmt.locale p (NumberFormat.scaleDown j x) ++ fmt.suffix j ++ fmt.unit
 
 /-- The number's characters without trailing zeros of the fraction, or the decimal separator left bare. Whole numbers are unchanged. -/
 def trimFraction (loc : Locale) (cs : List Char) : List Char :=
@@ -54,7 +55,7 @@ def trimFraction (loc : Locale) (cs : List Char) : List Char :=
 /-- `formatAt` with the trailing zeros of the number dropped. -/
 def NumberFormat.formatTrimmedAt (fmt : NumberFormat) (p : Nat) (x : Float) : String :=
   let j := fmt.magnitude x
-  String.ofList (trimFraction fmt.locale (floatLabel fmt.locale p (NumberFormat.scaleDown j x)).toList) ++ fmt.suffix j
+  String.ofList (trimFraction fmt.locale (floatLabel fmt.locale p (NumberFormat.scaleDown j x)).toList) ++ fmt.suffix j ++ fmt.unit
 
 /-- The most decimals an automatic precision tries. -/
 def maxPrecision : Nat := 15

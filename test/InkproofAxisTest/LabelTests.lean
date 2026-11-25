@@ -80,15 +80,22 @@ private def formats : TestCase := .mk "Number formats: compact units, fixed prec
     check (f.format 3.14159 == some "3.1") s!"{f.format 3.14159}"
     check (f.format 1234.56 == some "1,234.6") s!"{f.format 1234.56}"
     check (f.format (0.0 / 0.0) == none) "nan"
-    check ((NumberFormat.mk .en none [] false).format 2.5 == some "2.5") "default precision"
+    check ((NumberFormat.mk .en none [] false "").format 2.5 == some "2.5") "default precision"
 
 private def trimmedKnown : TestCase := .mk "Trimmed labels drop trailing zeros per label" <| do
     let t : NumberFormat := { trim := true }
     check (t.formatAll [0, 0.5, 1] == ["0", "0.5", "1"]) s!"{t.formatAll [0, 0.5, 1]}"
     check (t.formatAll [100, 250] == ["100", "250"]) s!"{t.formatAll [100, 250]}"
-    check ((NumberFormat.mk .en (some 3) [] true).formatAll [1, 1.25] == ["1", "1.25"]) "fixed"
-    check ((NumberFormat.mk .de none NumberFormat.short true).formatAll [1500, 2000] == ["1,5k", "2k"]) "compact"
+    check ((NumberFormat.mk .en (some 3) [] true "").formatAll [1, 1.25] == ["1", "1.25"]) "fixed"
+    check ((NumberFormat.mk .de none NumberFormat.short true "").formatAll [1500, 2000] == ["1,5k", "2k"]) "compact"
     check (t.formatAll [0.1 + 0.2] == ["0.3"]) "noise"
+
+private def unitKnown : TestCase := .mk "A unit ends every label, after the compact suffix" <| do
+    let pct : NumberFormat := { unit := "%", trim := true }
+    check (pct.formatAll [0, 25, 50] == ["0%", "25%", "50%"]) s!"{pct.formatAll [0, 25, 50]}"
+    let b : NumberFormat := { unit := "B", compact := NumberFormat.short }
+    check (b.formatAll [1000, 1500] == ["1.0kB", "1.5kB"]) s!"{b.formatAll [1000, 1500]}"
+    check (({ unit := " MB" } : NumberFormat).format 2 == some "2 MB") "spaced"
 
 private def trimmedReadBack : TestCase := .mk "Trimmed labels read back as the ticks" <|
   forAll 1000 genRange (fun (lo, hi) => do
@@ -103,6 +110,6 @@ private def trimmedReadBack : TestCase := .mk "Trimmed labels read back as the t
         check (!(s.endsWith "0") || !(s.contains '.')) s!"padded: {s}")
 
 def tests : List TestCase :=
-  [labelsMatchTicks, localesAgree, precisionFollowsSpacing, degenerate, known, formats, trimmedKnown, trimmedReadBack]
+  [labelsMatchTicks, localesAgree, precisionFollowsSpacing, degenerate, known, formats, trimmedKnown, unitKnown, trimmedReadBack]
 
 end InkproofAxisTest.LabelTests
